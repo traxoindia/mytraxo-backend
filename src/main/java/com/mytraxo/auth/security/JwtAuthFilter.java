@@ -19,73 +19,69 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-  private final JwtService jwtService;
-  private final UserRepository userRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-  public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
-    this.jwtService = jwtService;
-    this.userRepository = userRepository;
-  }
-
-  @Override
-  protected void doFilterInternal(HttpServletRequest request,
-                                  HttpServletResponse response,
-                                  FilterChain chain)
-      throws ServletException, IOException {
-
-    // Skip auth endpoints
-    String path = request.getRequestURI();
-    if (path.startsWith("/api/auth")) {
-      chain.doFilter(request, response);
-      return;
+    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
-    // Already authenticated? Skip
-    if (SecurityContextHolder.getContext().getAuthentication() != null) {
-      chain.doFilter(request, response);
-      return;
+    // Skip filter for login / register APIs
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/api/auth") || request.getMethod().equals("OPTIONS");
     }
 
-    String authHeader = request.getHeader("Authorization");
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
 
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-      chain.doFilter(request, response);
-      return;
-    }
+        String authHeader = request.getHeader("Authorization");
 
-    String token = authHeader.substring(7);
+        // If no token → continue without authentication
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
-    try {
-      Jws<Claims> parsed = jwtService.parse(token);
-      String email = parsed.getBody().getSubject();
+        String token = authHeader.substring(7);
 
-      User user = userRepository.findByEmail(email).orElse(null);
+        try {
 
-      if (user == null || !user.isEnabled()) {
+            Jws<Claims> parsed = jwtService.parse(token);
+            String email = parsed.getBody().getSubject();
+
+            User user = userRepository.findByEmail(email).orElse(null);
+
+            if (user == null || !user.isEnabled()) {
+                chain.doFilter(request, response);
+                return;
+            }
+
+            UserPrincipal principal = new UserPrincipal(
+                    user.getEmail(),
+                    user.getPasswordHash(),
+                    user.isEnabled(),
+                    user.getRoles()
+            );
+
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            principal,
+                            null,
+                            principal.getAuthorities()
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (JwtException e) {
+            // Invalid token → ignore and continue
+        }
+
         chain.doFilter(request, response);
-        return;
-      }
-
-      UserPrincipal principal = new UserPrincipal(
-          user.getEmail(),
-          user.getPasswordHash(),
-          user.isEnabled(),
-          user.getRoles()
-      );
-
-      UsernamePasswordAuthenticationToken authentication =
-          new UsernamePasswordAuthenticationToken(
-              principal,
-              null,
-              principal.getAuthorities()
-          );
-
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-
-    } catch (JwtException e) {
-      // Invalid or expired token — ignore and continue
     }
-
-    chain.doFilter(request, response);
-  }
 }
