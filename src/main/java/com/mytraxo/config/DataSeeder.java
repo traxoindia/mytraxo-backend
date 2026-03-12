@@ -17,7 +17,9 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
 
-    public DataSeeder(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder encoder) {
+    public DataSeeder(RoleRepository roleRepository,
+                      UserRepository userRepository,
+                      PasswordEncoder encoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
         this.encoder = encoder;
@@ -26,32 +28,51 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        // ✅ Seed Roles
+        // Seed Roles
         seedRole("ADMIN");
         seedRole("HR");
         seedRole("USER");
 
-        // ✅ Seed Users
-        seedUser("admin@mytraxo.com", "Admin@123", List.of("ADMIN"));
+        // Seed Users
+        seedUser("admin@traxoindia.in", "admin@1987", List.of("ADMIN"));
         seedUser("hr@mytraxo.com", "Hr@123", List.of("HR"));
         seedUser("user@mytraxo.com", "User@123", List.of("USER"));
     }
 
     private void seedRole(String name) {
         if (!roleRepository.existsByName(name)) {
-            roleRepository.save(new Role(null, name));
+            Role role = new Role();
+            role.setName(name);
+            roleRepository.save(role);
         }
     }
 
     private void seedUser(String email, String password, List<String> roles) {
-        if (userRepository.existsByEmail(email)) return;
 
-        User u = new User();
-        u.setEmail(email.toLowerCase());
-        u.setPasswordHash(encoder.encode(password));
-        u.setEnabled(true);
-        u.setRoles(roles);
+        User existingUser = userRepository.findByEmail(email).orElse(null);
 
-        userRepository.save(u);
+        if (existingUser == null) {
+
+            // Create new user
+            User user = new User();
+            user.setEmail(email.toLowerCase());
+            user.setPasswordHash(encoder.encode(password));
+            user.setEnabled(true);
+            user.setRoles(roles);
+
+            userRepository.save(user);
+
+            System.out.println("User created: " + email);
+
+        } else {
+
+            // Update password and roles
+            existingUser.setPasswordHash(encoder.encode(password));
+            existingUser.setRoles(roles);
+
+            userRepository.save(existingUser);
+
+            System.out.println("User updated: " + email);
+        }
     }
 }
