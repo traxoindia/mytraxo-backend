@@ -79,17 +79,16 @@
   <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-data-mongodb</artifactId>
 </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <optional>true</optional>
-    </dependency>
 <dependency>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-core</artifactId>
     <version>2.9.2</version>
 </dependency>
-
+ <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
+    </dependency>
 <dependency>
     <groupId>org.apache.tika</groupId>
     <artifactId>tika-parsers-standard-package</artifactId>

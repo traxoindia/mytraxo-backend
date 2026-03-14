@@ -47,6 +47,8 @@ public class SecurityConfig {
         // ✅ Public endpoints
         .requestMatchers("/actuator/health").permitAll()
         .requestMatchers("/api/auth/**").permitAll()
+		// Career public APIs
+        .requestMatchers("/api/careers/**").permitAll()
 
         // ✅ Role protected routes
         .requestMatchers("/api/admin/**").hasRole("ADMIN")

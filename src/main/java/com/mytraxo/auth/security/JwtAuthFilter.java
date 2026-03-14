@@ -28,11 +28,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     // Skip filter for login / register APIs
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth") || request.getMethod().equals("OPTIONS");
-    }
+   @Override
+protected boolean shouldNotFilter(HttpServletRequest request) {
+
+    String path = request.getServletPath();
+
+    return path.startsWith("/api/auth")
+        || path.startsWith("/api/careers")   // allow career APIs
+        || request.getMethod().equals("OPTIONS");
+}
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

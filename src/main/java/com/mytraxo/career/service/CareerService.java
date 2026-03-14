@@ -7,9 +7,13 @@ import com.mytraxo.career.entity.JobApplication;
 import com.mytraxo.career.repo.JobApplicationRepository;
 import com.mytraxo.career.repo.JobRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CareerService {
@@ -43,17 +47,74 @@ public class CareerService {
     public List<Job> getJobs(){
         return jobRepository.findByActiveTrue();
     }
+ // UPLOAD CV
+    public String uploadCv(MultipartFile file){
 
-    // APPLY JOB
+        try {
+
+            String uploadDir = "uploads/cv/";
+            new File(uploadDir).mkdirs();
+
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+            File dest = new File(uploadDir + fileName);
+
+            file.transferTo(dest);
+
+            return fileName;
+
+        } catch (Exception e){
+            throw new RuntimeException("CV upload failed");
+        }
+    }
+
+     // APPLY JOB
     public JobApplication applyJob(JobApplicationRequest request){
-
         JobApplication application = JobApplication.builder()
+
                 .jobId(request.getJobId())
-                .name(request.getName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
+
+                // Personal
+                .fullName(request.getFullName())
+                .dateOfBirth(request.getDateOfBirth())
+                .gender(request.getGender())
+                .phoneNumber(request.getPhoneNumber())
+                .emailAddress(request.getEmailAddress())
+                .currentAddress(request.getCurrentAddress())
+
+                // Professional
+                .expectedSalary(request.getExpectedSalary())
+                .noticePeriod(request.getNoticePeriod())
+                .availableStartDate(request.getAvailableStartDate())
+                .willingToRelocate(request.getWillingToRelocate())
+
+                // Education
+                .highestQualification(request.getHighestQualification())
+                .degreeName(request.getDegreeName())
+                .universityCollege(request.getUniversityCollege())
+                .fieldOfStudy(request.getFieldOfStudy())
+                .graduationYear(request.getGraduationYear())
+                .percentageGPA(request.getPercentageGPA())
+
+                // Experience
+                .totalExperience(request.getTotalExperience())
+                .currentCompany(request.getCurrentCompany())
+                .currentJobTitle(request.getCurrentJobTitle())
+                .previousCompany(request.getPreviousCompany())
+
+                // Skills
+                .keySkills(request.getKeySkills())
+                .technicalSkills(request.getTechnicalSkills())
+
+                // Resume
+                .cvFileUrl(request.getCvFileUrl())
+
+                // Reference
+                .referenceName(request.getReferenceName())
+
                 .status("APPLIED")
                 .appliedAt(Instant.now())
+
                 .build();
 
         return applicationRepository.save(application);

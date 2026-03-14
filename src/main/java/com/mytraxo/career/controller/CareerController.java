@@ -6,6 +6,7 @@ import com.mytraxo.career.entity.Job;
 import com.mytraxo.career.entity.JobApplication;
 import com.mytraxo.career.service.CareerService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,6 +30,12 @@ public class CareerController {
     @GetMapping("/jobs")
     public List<Job> getJobs(){
         return service.getJobs();
+    }
+
+    // UPLOAD CV
+    @PostMapping("/upload-cv")
+    public String uploadCv(@RequestParam("file") MultipartFile file){
+        return service.uploadCv(file);
     }
 
     // APPLY JOB
