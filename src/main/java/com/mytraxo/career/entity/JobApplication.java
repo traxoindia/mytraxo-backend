@@ -1,14 +1,18 @@
 package com.mytraxo.career.entity;
 
+import lombok.*;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import com.mytraxo.career.enums.ApplicationStage;
 
 import java.time.Instant;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "job_applications")
 public class JobApplication {
 
@@ -55,6 +59,10 @@ public class JobApplication {
     // Reference
     private String referenceName;
 
-    private String status;
+    // recruitment stage
+    private ApplicationStage stage;
+
+     // status
+   private String status;
     private Instant appliedAt;
 }

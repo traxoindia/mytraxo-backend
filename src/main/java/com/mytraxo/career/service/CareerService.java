@@ -6,11 +6,17 @@ import com.mytraxo.career.entity.Job;
 import com.mytraxo.career.entity.JobApplication;
 import com.mytraxo.career.repo.JobApplicationRepository;
 import com.mytraxo.career.repo.JobRepository;
+
+import com.mytraxo.career.enums.ApplicationStage;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +32,31 @@ public class CareerService {
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
     }
+public JobApplication getApplicationProfile(String applicationId){
+    return applicationRepository.findById(applicationId).orElseThrow();
+}
+public JobApplication moveToScreening(String id){
 
+    JobApplication application = applicationRepository.findById(id).orElseThrow();
+
+    application.setStage(ApplicationStage.SCREENING);
+
+    return applicationRepository.save(application);
+}
+public JobApplication updateStage(String id, String stage){
+
+    JobApplication application = applicationRepository.findById(id).orElseThrow();
+
+    application.setStage(ApplicationStage.valueOf(stage));
+
+    return applicationRepository.save(application);
+}
+public List<JobApplication> getApplicationsByStage(String stage){
+
+    ApplicationStage applicationStage = ApplicationStage.valueOf(stage);
+
+    return applicationRepository.findByStage(applicationStage);
+}
     // HR POST JOB
     public Job createJob(JobRequest request){
 
@@ -48,25 +78,24 @@ public class CareerService {
         return jobRepository.findByActiveTrue();
     }
  // UPLOAD CV
-    public String uploadCv(MultipartFile file){
+   public String uploadCv(MultipartFile file) {
 
-        try {
+    try {
 
-            String uploadDir = "uploads/cv/";
-            new File(uploadDir).mkdirs();
+        String fileName = file.getOriginalFilename();
 
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        // Example saving locally
+        Path path = Paths.get("uploads/" + fileName);
 
-            File dest = new File(uploadDir + fileName);
+        Files.createDirectories(path.getParent());
+        Files.write(path, file.getBytes());
 
-            file.transferTo(dest);
+        return "CV uploaded successfully: " + fileName;
 
-            return fileName;
-
-        } catch (Exception e){
-            throw new RuntimeException("CV upload failed");
-        }
+    } catch (Exception e) {
+        throw new RuntimeException("File upload failed");
     }
+}
 
      // APPLY JOB
     public JobApplication applyJob(JobApplicationRequest request){
@@ -111,8 +140,8 @@ public class CareerService {
 
                 // Reference
                 .referenceName(request.getReferenceName())
-
-                .status("APPLIED")
+                .stage(ApplicationStage.APPLIED) 
+                .status("PENDING")
                 .appliedAt(Instant.now())
 
                 .build();

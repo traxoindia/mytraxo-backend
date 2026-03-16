@@ -25,7 +25,28 @@ public class CareerController {
     public Job createJob(@RequestBody JobRequest request){
         return service.createJob(request);
     }
+    //View Candidate Profile API
+    @GetMapping("/applications/profile/{applicationId}")
+public JobApplication getApplicationProfile(@PathVariable String applicationId){
+    return service.getApplicationProfile(applicationId);
+}
+//Move Candidate to Screening
+@PutMapping("/applications/{id}/screening")
+public JobApplication moveToScreening(@PathVariable String id){
+    return service.moveToScreening(id);
+}
+//Move Candidate to Next Round
+@PutMapping("/applications/{id}/stage")
+public JobApplication updateStage(@PathVariable String id,
+                                  @RequestParam String stage){
 
+    return service.updateStage(id, stage);
+}
+//Recruitment Dashboard API
+@GetMapping("/applications/stage/{stage}")
+public List<JobApplication> getByStage(@PathVariable String stage){
+    return service.getApplicationsByStage(stage);
+}
     // PUBLIC JOB LIST
     @GetMapping("/jobs")
     public List<Job> getJobs(){

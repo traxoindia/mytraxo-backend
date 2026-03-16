@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.mytraxo.career.enums.ApplicationStage;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -19,7 +20,7 @@ public class Job {
 
     @Id
     private String id;
-
+    private ApplicationStage stage;
     private String jobTitle;
     private String position;
     private String department;
