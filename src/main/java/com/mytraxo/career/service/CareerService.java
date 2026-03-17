@@ -7,6 +7,10 @@ import com.mytraxo.career.entity.JobApplication;
 import com.mytraxo.career.repo.JobApplicationRepository;
 import com.mytraxo.career.repo.JobRepository;
 
+import com.mytraxo.career.dto.InterviewRequest;
+import com.mytraxo.career.entity.InterviewSchedule;
+import com.mytraxo.career.repo.InterviewScheduleRepository;
+
 import com.mytraxo.career.enums.ApplicationStage;
 
 import org.springframework.stereotype.Service;
@@ -26,11 +30,13 @@ public class CareerService {
 
     private final JobRepository jobRepository;
     private final JobApplicationRepository applicationRepository;
+    private final InterviewScheduleRepository interviewRepository;
 
     public CareerService(JobRepository jobRepository,
-                         JobApplicationRepository applicationRepository) {
+                         JobApplicationRepository applicationRepository,InterviewScheduleRepository interviewRepository) {
         this.jobRepository = jobRepository;
         this.applicationRepository = applicationRepository;
+        this.interviewRepository = interviewRepository;
     }
 public JobApplication getApplicationProfile(String applicationId){
     return applicationRepository.findById(applicationId).orElseThrow();
@@ -50,6 +56,30 @@ public JobApplication updateStage(String id, String stage){
     application.setStage(ApplicationStage.valueOf(stage));
 
     return applicationRepository.save(application);
+}
+public InterviewSchedule scheduleInterview(InterviewRequest request){
+
+    // Update application stage
+    JobApplication application = applicationRepository
+            .findById(request.getApplicationId())
+            .orElseThrow();
+
+    application.setStage(request.getInterviewRound());
+    applicationRepository.save(application);
+
+    // Save interview
+    InterviewSchedule interview = InterviewSchedule.builder()
+            .applicationId(request.getApplicationId())
+            .interviewDate(request.getInterviewDate())
+            .interviewTime(request.getInterviewTime())
+            .interviewRound(request.getInterviewRound())
+            .interviewerName(request.getInterviewerName())
+            .interviewLink(request.getInterviewLink())
+            .notes(request.getNotes())
+            .status("SCHEDULED")
+            .build();
+
+    return interviewRepository.save(interview);
 }
 public List<JobApplication> getApplicationsByStage(String stage){
 
@@ -153,4 +183,7 @@ public List<JobApplication> getApplicationsByStage(String stage){
     public List<JobApplication> getApplications(String jobId){
         return applicationRepository.findByJobId(jobId);
     }
+    public List<InterviewSchedule> getInterviews(String applicationId){
+    return interviewRepository.findByApplicationId(applicationId);
+}
 }

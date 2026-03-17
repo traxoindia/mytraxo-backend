@@ -5,6 +5,10 @@ import com.mytraxo.career.dto.JobRequest;
 import com.mytraxo.career.entity.Job;
 import com.mytraxo.career.entity.JobApplication;
 import com.mytraxo.career.service.CareerService;
+
+import com.mytraxo.career.dto.InterviewRequest;
+import com.mytraxo.career.entity.InterviewSchedule;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +38,14 @@ public JobApplication getApplicationProfile(@PathVariable String applicationId){
 @PutMapping("/applications/{id}/screening")
 public JobApplication moveToScreening(@PathVariable String id){
     return service.moveToScreening(id);
+}
+@PostMapping("/interview/schedule")
+public InterviewSchedule schedule(@RequestBody InterviewRequest request){
+    return service.scheduleInterview(request);
+}
+@GetMapping("/interview/{applicationId}")
+public List<InterviewSchedule> getInterviews(@PathVariable String applicationId){
+    return service.getInterviews(applicationId);
 }
 //Move Candidate to Next Round
 @PutMapping("/applications/{id}/stage")
