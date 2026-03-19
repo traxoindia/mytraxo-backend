@@ -8,7 +8,7 @@ import com.mytraxo.career.service.CareerService;
 
 import com.mytraxo.career.dto.InterviewRequest;
 import com.mytraxo.career.entity.InterviewSchedule;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,8 +78,16 @@ public List<JobApplication> getByStage(@PathVariable String stage){
     }
 
     // HR VIEW APPLICATIONS
-    @GetMapping("/applications/{jobId}")
+    @GetMapping("/applications/job/{jobId}")
     public List<JobApplication> getApplications(@PathVariable String jobId){
         return service.getApplications(jobId);
     }
+    @GetMapping("/applications")
+public ResponseEntity<List<JobApplication>> getAllApplications() {
+    return ResponseEntity.ok(service.getAllApplications());
+}
+@GetMapping("/applications/selected")
+public ResponseEntity<List<JobApplication>> getSelectedCandidates() {
+    return ResponseEntity.ok(service.getSelectedCandidates());
+}
 }

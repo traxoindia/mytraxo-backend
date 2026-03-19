@@ -186,4 +186,10 @@ public List<JobApplication> getApplicationsByStage(String stage){
     public List<InterviewSchedule> getInterviews(String applicationId){
     return interviewRepository.findByApplicationId(applicationId);
 }
+public List<JobApplication> getAllApplications() {
+    return applicationRepository.findAll();
+}
+public List<JobApplication> getSelectedCandidates() {
+    return applicationRepository.findByStage(ApplicationStage.HIRED);
+}
 }

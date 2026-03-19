@@ -1,5 +1,6 @@
 package com.mytraxo.employee.entity;
-
+import lombok.Data;
+import lombok.Builder;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
