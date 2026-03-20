@@ -7,7 +7,7 @@ public enum ApplicationStage {
     HR_ROUND,
     TECHNICAL_ROUND,
     MANAGERIAL_ROUND,
-    OFFER,
+    SELECTED,
     HIRED,
     REJECTED
 }
