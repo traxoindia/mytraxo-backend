@@ -9,7 +9,7 @@ spring:
 app:
   jwt:
     secret: ${APP_JWT_SECRET}
-    accessMinutes: 15
+    accessMinutes: 720
     refreshDays: 30
   cors:
     allowedOrigins: ${APP_CORS_ALLOWEDORIGINS:http://localhost:5173}
