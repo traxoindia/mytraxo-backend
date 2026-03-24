@@ -1,11 +1,22 @@
 package com.mytraxo.dashboard;
 
 import org.springframework.web.bind.annotation.*;
+
+import com.mytraxo.dashboard.service.DashboardService;
+import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/dashboard")
 public class DashboardController {
+
+  private final DashboardService service;
+
+    @GetMapping("/stats")
+    public Map<String, Long> getStats() {
+        return service.getStats();
+    }
 
   @GetMapping("/admin/summary")
   public Map<String, Object> adminSummary() {
