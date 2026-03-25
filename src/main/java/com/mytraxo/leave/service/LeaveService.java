@@ -3,8 +3,6 @@ package com.mytraxo.leave.service;
 import com.mytraxo.leave.entity.Leave;
 import com.mytraxo.leave.repository.LeaveRepository;
 import lombok.RequiredArgsConstructor;
-import com.mytraxo.common.service.EmailService;
-
 import org.springframework.stereotype.Service;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.repository.AttendanceRepository;
@@ -21,8 +19,8 @@ public class LeaveService {
 
     private final LeaveRepository repository;
     private final AttendanceRepository attendanceRepository;
-    private final EmailService emailService;
     private final NotificationRepository notificationRepository;
+    
     // ✅ Apply Leave
     public Leave applyLeave(Leave leave) {
         leave.setStatus("PENDING");
@@ -36,6 +34,7 @@ public class LeaveService {
             .orElseThrow(() -> new RuntimeException("Leave not found"));
 
     leave.setStatus("APPROVED");
+    
     Notification notification = new Notification();
 notification.setEmployeeId(leave.getEmployeeId());
 notification.setMessage("Your leave has been approved");
