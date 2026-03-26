@@ -14,7 +14,7 @@ public class Employee {
 
     @Id
     private String id;
-
+    private String role;
     // Basic Information
     private String employeeId;
     private String fullName;

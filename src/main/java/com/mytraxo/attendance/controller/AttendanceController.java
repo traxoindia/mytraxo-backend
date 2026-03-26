@@ -19,24 +19,28 @@ public class AttendanceController {
 
     private final AttendanceService service;
 
-    // ✅ 1. CHECK-IN (JSON BODY)
-    @PostMapping("/check-in")
-    public Attendance checkIn(@RequestBody CheckInRequest request) {
+     // ✅ AUTOMATIC CHECK-IN
+    // Frontend body: { "lat": 22.5, "lng": 88.3 }
+  @PostMapping("/check-in")
+// Changed LocationRequest to CheckInRequest
+public Attendance checkIn(java.security.Principal principal, @RequestBody CheckInRequest request) {
+    
+    // 1. Automatic Fetch: Get email from the Token
+    String email = principal.getName(); 
+    
+    // 2. Call Service with email and coordinates from your DTO
+    return service.checkIn(email, request.getLat(), request.getLng());
+}
 
-        return service.checkIn(
-                request.getEmployeeId(),
-                request.getEmployeeName(),
-                request.getLat(),
-                request.getLng()
-        );
-    }
+@PostMapping("/check-out")
+public Attendance checkOut(java.security.Principal principal) {
+    // 1. Automatic Fetch: Get email from the Token
+    String email = principal.getName();
+    
+    // 2. No request body needed for check-out
+    return service.checkOut(email);
+}
 
-    // ✅ 2. CHECK-OUT (JSON BODY)
-    @PostMapping("/check-out")
-    public Attendance checkOut(@RequestBody CheckOutRequest request) {
-
-        return service.checkOut(request.getEmployeeId());
-    }
 
     // ✅ 3. GET ATTENDANCE BY EMPLOYEE
     @GetMapping("/{employeeId}")

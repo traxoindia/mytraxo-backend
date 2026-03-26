@@ -1,7 +1,9 @@
 package com.mytraxo.employee.dto;
 
 import lombok.Data;
+import lombok.Builder;
 
+@Builder
 @Data
 public class EmployeeRequest {
 

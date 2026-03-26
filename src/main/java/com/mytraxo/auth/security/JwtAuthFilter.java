@@ -1,5 +1,4 @@
 package com.mytraxo.auth.security;
-
 import com.mytraxo.auth.entity.User;
 import com.mytraxo.auth.repo.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -9,22 +8,29 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import com.mytraxo.employee.entity.Employee;
+import com.mytraxo.employee.repo.EmployeeRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final EmployeeRepository employeeRepository; // 1. Add this
 
-    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
+    public JwtAuthFilter(JwtService jwtService, UserRepository userRepository,EmployeeRepository employeeRepository) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     // Skip filter for login / register APIs
@@ -61,11 +67,8 @@ protected boolean shouldNotFilter(HttpServletRequest request) {
 
             User user = userRepository.findByEmail(email).orElse(null);
 
-            if (user == null || !user.isEnabled()) {
-                chain.doFilter(request, response);
-                return;
-            }
-
+           if (user != null && user.isEnabled()) {
+            // This is your EXACT original logic - No changes here
             UserPrincipal principal = new UserPrincipal(
                     user.getEmail(),
                     user.getPasswordHash(),
@@ -81,11 +84,30 @@ protected boolean shouldNotFilter(HttpServletRequest request) {
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
+        } 
+        // 🛡️ STEP 2: ONLY IF USER IS NOT FOUND, CHECK FOR EMPLOYEE
+        // This is the new "Fallback" logic that only runs for Employees
+        else {
+            Employee employee = employeeRepository.findByEmailAddress(email).orElse(null);
+            
+            if (employee != null) {
+                // We create a simple principal for the employee
+                // This will NOT affect how Admin/HR principals work
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                email, // Use the email as the name
+                                null, 
+                                List.of(new SimpleGrantedAuthority("ROLE_EMPLOYEE"))
+                        );
 
-        } catch (JwtException e) {
-            // Invalid token → ignore and continue
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
 
-        chain.doFilter(request, response);
+    } catch (JwtException e) {
+        // Invalid token → ignore and continue
     }
+
+    chain.doFilter(request, response);
+}
 }

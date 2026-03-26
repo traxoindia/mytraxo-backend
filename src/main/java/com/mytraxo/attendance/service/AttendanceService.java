@@ -3,6 +3,10 @@ package com.mytraxo.attendance.service;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.employee.entity.Employee;
+
+import com.mytraxo.employee.repo.EmployeeRepository;
+
 import com.mytraxo.attendance.dto.AttendanceReportDto;
 import com.mytraxo.attendance.dto.CalendarDto;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import java.util.List;
 public class AttendanceService {
 
     private final AttendanceRepository repository;
+    private final EmployeeRepository employeeRepository;
 
     // ⏰ Late after 10:15 AM
     private static final LocalTime LATE_TIME = LocalTime.of(10, 15);
@@ -23,21 +28,64 @@ public class AttendanceService {
     private static final double OFFICE_LNG = 88.3639;
     private static final double ALLOWED_RADIUS = 40; // meters
 
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+  public Attendance checkIn(String email, double lat, double lng) {
+        // 1. Fetch employee automatically from DB using email
+        Employee employee = employeeRepository.findByEmailAddress(email)
+                .orElseThrow(() -> new RuntimeException("Employee record not found"));
 
-    final int R = 6371000; // Earth radius in meters
+        String employeeId = String.valueOf(employee.getEmployeeId()); 
+        String employeeName = employee.getFullName();
+        LocalDate today = LocalDate.now();
 
-    double dLat = Math.toRadians(lat2 - lat1);
-    double dLon = Math.toRadians(lon2 - lon1);
+        // 2. Prevent duplicate check-in
+        if (repository.findByEmployeeIdAndDate(employeeId, today).isPresent()) {
+            throw new RuntimeException("Already checked in today");
+        }
 
-    double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-            * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        // 3. Location Validation
+        double distance = calculateDistance(lat, lng, OFFICE_LAT, OFFICE_LNG);
+        if (distance > ALLOWED_RADIUS) {
+            throw new RuntimeException("You must be within 40 meters of office");
+        }
 
-    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        Attendance attendance = new Attendance();
+        attendance.setEmployeeId(employeeId);
+        attendance.setEmployeeName(employeeName);
+        attendance.setDate(today);
+        attendance.setCheckIn(LocalDateTime.now());
 
-    return R * c;
-}
+        // Status Logic
+        if (LocalTime.now().isAfter(LocalTime.of(10, 15))) {
+            attendance.setStatus("LATE");
+        } else {
+            attendance.setStatus("PRESENT");
+        }
+
+        return repository.save(attendance);
+    }
+
+    // ✅ NEW: Automatic Fetch Check-out
+    public Attendance checkOut(String email) {
+        Employee employee = employeeRepository.findByEmailAddress(email)
+                .orElseThrow(() -> new RuntimeException("Employee record not found"));
+
+        String employeeId = String.valueOf(employee.getEmployeeId());
+
+        Attendance attendance = repository.findByEmployeeIdAndDate(employeeId, LocalDate.now())
+                .orElseThrow(() -> new RuntimeException("Check-in record not found for today"));
+
+        LocalDateTime now = LocalDateTime.now();
+        attendance.setCheckOut(now);
+
+        Duration duration = Duration.between(attendance.getCheckIn(), now);
+        attendance.setWorkingHours(duration.toMinutes() / 60.0);
+
+        if (now.toLocalTime().isBefore(HALF_DAY_TIME)) {
+            attendance.setStatus("HALF_DAY");
+        }
+
+        return repository.save(attendance);
+    }
 public AttendanceReportDto getMonthlyReport(String employeeId, int year, int month) {
 
     LocalDate start = LocalDate.of(year, month, 1);
@@ -94,43 +142,6 @@ public List<CalendarDto> getCalendar(String employeeId, int year, int month) {
         return dto;
     }).collect(Collectors.toList());
 }
-
-    // ✅ CHECK-IN
-    LocalDate today = LocalDate.now();
-   public Attendance checkIn(String employeeId, String employeeName,
-                          double lat, double lng) {
-
-
-    if (repository.findByEmployeeIdAndDate(employeeId, today).isPresent()) {
-        throw new RuntimeException("Already checked in today");
-    }
-
-    // 📍 LOCATION VALIDATION
-    double distance = calculateDistance(lat, lng, OFFICE_LAT, OFFICE_LNG);
-
-    if (distance > ALLOWED_RADIUS) {
-        throw new RuntimeException("You must be within 40 meters of office to check-in");
-    }
-
-    Attendance attendance = new Attendance();
-    attendance.setEmployeeId(employeeId);
-    attendance.setEmployeeName(employeeName);
-    attendance.setDate(today);
-
-    LocalDateTime now = LocalDateTime.now();
-    attendance.setCheckIn(now);
-
-    // Late after 10:15
-  if (now.toLocalTime().isBefore(HALF_DAY_TIME)) {
-    attendance.setStatus("HALF_DAY");
-} else if ("LATE".equals(attendance.getStatus())) {
-    attendance.setStatus("LATE_PRESENT");
-} else {
-    attendance.setStatus("PRESENT");
-}
-
-    return repository.save(attendance);
-}
 public List<Attendance> getMonthlyAttendance(String employeeId, int year, int month) {
 
     LocalDate start = LocalDate.of(year, month, 1);
@@ -141,32 +152,14 @@ public List<Attendance> getMonthlyAttendance(String employeeId, int year, int mo
 public List<Attendance> getByEmployee(String employeeId) {
     return repository.findByEmployeeId(employeeId);
 }
-    // ✅ CHECK-OUT
-    public Attendance checkOut(String employeeId) {
-
-        
-
-        Attendance attendance = repository.findByEmployeeIdAndDate(employeeId, today)
-                .orElseThrow(() -> new RuntimeException("Check-in not found"));
-
-       if (attendance.getCheckIn() == null) {
-    throw new RuntimeException("Invalid check-in time");
-}
-        LocalDateTime now = LocalDateTime.now();
-        attendance.setCheckOut(now);
-
-        // 🕒 Calculate working hours
-        Duration duration = Duration.between(attendance.getCheckIn(), now);
-        double hours = duration.toMinutes() / 60.0;
-        attendance.setWorkingHours(hours);
-
-        // 🔥 Half-day logic
-        if (now.toLocalTime().isBefore(HALF_DAY_TIME)) {
-    attendance.setStatus("HALF_DAY");
-} else if (!"LATE".equals(attendance.getStatus())) {
-    attendance.setStatus("PRESENT");
-}
-
-        return repository.save(attendance);
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371000; 
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                   Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                   Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 }
+

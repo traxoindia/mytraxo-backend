@@ -3,6 +3,10 @@ package com.mytraxo.auth.controller;
 import com.mytraxo.auth.dto.*;
 import com.mytraxo.auth.service.AuthService;
 import jakarta.validation.Valid;
+import com.mytraxo.employee.entity.Employee;
+
+import com.mytraxo.employee.repo.EmployeeRepository;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,11 +15,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final AuthService authService;
-
+  
   public AuthController(AuthService authService) {
     this.authService = authService;
   }
-
+  
   @PostMapping("/register")
   public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest req) {
     authService.register(req);
@@ -37,4 +41,14 @@ public class AuthController {
     authService.logout(req.getRefreshToken());
     return ResponseEntity.ok("Logged out");
   }
+  @PostMapping("/employee-login")
+public ResponseEntity<AuthResponse> employeeLogin(@RequestBody LoginRequest req) {
+    // req.getEmail() is email, req.getPassword() will be the phone number
+    return ResponseEntity.ok(authService.employeeLogin(req.getEmail(), req.getPassword()));
+}
+@PostMapping("/register-employee")
+public ResponseEntity<?> registerEmployee(@RequestBody Employee request) {
+    authService.registerEmployee(request);
+    return ResponseEntity.ok("Employee registered successfully in AWS!");
+}
 }
