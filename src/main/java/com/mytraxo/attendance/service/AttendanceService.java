@@ -24,8 +24,8 @@ public class AttendanceService {
     // ⏰ Late after 10:15 AM
     private static final LocalTime LATE_TIME = LocalTime.of(10, 15);
     private static final LocalTime HALF_DAY_TIME = LocalTime.of(17, 0);
-    private static final double OFFICE_LAT = 22.5726;   // example (update with your office)
-    private static final double OFFICE_LNG = 88.3639;
+    private static final double OFFICE_LAT = 21.485979081333724;   // example (update with your office)
+    private static final double OFFICE_LNG = 86.90728760427798;
     private static final double ALLOWED_RADIUS = 40; // meters
 
   public Attendance checkIn(String email, double lat, double lng) {
