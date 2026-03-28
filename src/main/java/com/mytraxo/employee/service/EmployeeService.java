@@ -48,6 +48,7 @@ public class EmployeeService {
         employee.setEmployeeType(request.getEmployeeType());
         employee.setDateOfJoining(request.getDateOfJoining());
         employee.setWorkLocation(request.getWorkLocation());
+       // employee.setEmploymentStatus(request.getEmploymentStatus());
 
         employee.setSalary(request.getSalary());
         employee.setBankAccountNumber(request.getBankAccountNumber());

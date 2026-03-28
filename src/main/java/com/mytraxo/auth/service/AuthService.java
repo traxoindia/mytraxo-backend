@@ -14,6 +14,8 @@ import com.mytraxo.employee.repo.EmployeeRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
+import com.mytraxo.employee.entity.EmployeeStatus;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -86,10 +88,10 @@ public void registerEmployee(Employee employee) {
     employee.setEmailAddress(employee.getEmailAddress().toLowerCase().trim());
     
     // 3. Set a default status if none is provided
-    if (employee.getEmploymentStatus() == null) {
-        // Use your Enum (ACTIVE, CURRENT, etc.)
-        employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.ACTIVE);
-    }
+   if (employee.getEmploymentStatus() == null) {
+    // Use your Enum (ACTIVE, CURRENT, etc.)
+    employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.ACTIVE);
+}
 
     // 4. Save to AWS MongoDB
     employeeRepository.save(employee);
