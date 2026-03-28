@@ -71,4 +71,15 @@ notificationRepository.save(notification);
     public List<Leave> getByEmployee(String employeeId) {
         return repository.findByEmployeeId(employeeId);
     }
+    public List<Leave> getAllLeaves() {
+    return repository.findAll();
+}
+
+public List<Leave> getPendingLeaves() {
+    return repository.findByStatus("PENDING");
+}
+
+public List<Leave> getLeavesByEmployee(String employeeId) {
+    return repository.findByEmployeeId(employeeId);
+}
 }
