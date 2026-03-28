@@ -77,7 +77,7 @@ public class AuthService {
             .refreshToken(refresh)
             .roles(roles)
             .employeeId(emp.getEmployeeId()) // From Employee Entity
-            .name(emp.getFullName())  // Combine names
+            //.name(emp.getFullName())  // Combine names
            // .status(emp.getEmploymentStatus().name()) // Enum to String
             .build();
     }
