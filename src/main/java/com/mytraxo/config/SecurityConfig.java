@@ -54,10 +54,10 @@ public class SecurityConfig {
         .requestMatchers("/api/admin/**").hasRole("ADMIN")
         .requestMatchers("/api/hr/**").hasRole("HR")
         .requestMatchers("/api/user/**").hasRole("USER")
-        //.requestMatchers("/api/attendance/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
+        .requestMatchers("/api/attendance/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
         // TO THIS (Temporary):
-.requestMatchers("/api/attendance/**").authenticated()
-        .requestMatchers("/api/leave/**").hasAnyRole("USER","HR","ADMIN")
+//.requestMatchers("/api/attendance/**").authenticated()
+        .requestMatchers("/api/leave/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
 
         .anyRequest().authenticated()
