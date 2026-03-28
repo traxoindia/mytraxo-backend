@@ -78,7 +78,7 @@ public class AuthService {
             .roles(roles)
             .employeeId(emp.getEmployeeId()) // From Employee Entity
             .name(emp.getFullName())  // Combine names
-            .status(emp.getEmploymentStatus().name()) // Enum to String
+           // .status(emp.getEmploymentStatus().name()) // Enum to String
             .build();
     }
 public void registerEmployee(Employee employee) {

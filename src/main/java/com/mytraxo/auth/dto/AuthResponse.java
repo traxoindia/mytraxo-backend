@@ -17,6 +17,6 @@ public class AuthResponse {
   // ADD THESE FIELDS
     private String employeeId;
     private String name;
-    private String status;
+    //private String status;
 }
 
