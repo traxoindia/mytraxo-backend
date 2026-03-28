@@ -14,4 +14,9 @@ public class AuthResponse {
   private  String accessToken;
   private  String refreshToken;
   private  List<String> roles;
+  // ADD THESE FIELDS
+    private String employeeId;
+    private String name;
+    private String status;
 }
+
