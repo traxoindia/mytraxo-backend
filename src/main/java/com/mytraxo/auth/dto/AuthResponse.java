@@ -16,7 +16,7 @@ public class AuthResponse {
   private  List<String> roles;
   // ADD THESE FIELDS
     private String employeeId;
-    private String name;
+   // private String name;
     //private String status;
 }
 
