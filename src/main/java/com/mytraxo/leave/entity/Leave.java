@@ -15,7 +15,8 @@ public class Leave {
 
     private String employeeId;
     private String type; // FULL_DAY / HALF_DAY
-    private LocalDate date;
+    private LocalDate fromDate; 
+    private LocalDate toDate;
     private String reason;
 
     private String status; // PENDING / APPROVED / REJECTED

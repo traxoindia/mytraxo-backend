@@ -17,4 +17,5 @@ public interface AttendanceRepository extends MongoRepository<Attendance, String
     LocalDate start,
     LocalDate end
 );
+ List<Attendance> findByDate(LocalDate date);
 }

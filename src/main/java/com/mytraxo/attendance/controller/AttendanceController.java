@@ -3,6 +3,7 @@ package com.mytraxo.attendance.controller;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.service.AttendanceService;
 import com.mytraxo.attendance.dto.AttendanceReportDto;
+import com.mytraxo.attendance.dto.AttendanceStatusDto;
 import com.mytraxo.attendance.dto.CalendarDto;
 import com.mytraxo.attendance.dto.CheckInRequest;
 import com.mytraxo.attendance.dto.CheckOutRequest;
@@ -10,6 +11,7 @@ import com.mytraxo.attendance.dto.QRRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -77,4 +79,15 @@ public Attendance checkOut(java.security.Principal principal) {
                 request.getQrToken()
         );
     }
+    @GetMapping("/hr/all-status")
+// Restrict to HR and ADMIN
+public List<AttendanceStatusDto> getAllStatusForHR(
+        @RequestParam(value = "date", required = false) 
+        @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) 
+        LocalDate date) {
+    
+    // Default to today if no date is provided
+    LocalDate targetDate = (date != null) ? date : LocalDate.now();
+    return service.getAllEmployeesAttendanceStatus(targetDate);
+}
 }

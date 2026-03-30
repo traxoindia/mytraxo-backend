@@ -58,7 +58,8 @@ public class SecurityConfig {
         // TO THIS (Temporary):
 //.requestMatchers("/api/attendance/**").authenticated()
         .requestMatchers("/api/leave/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
-        .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
+        .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "HR", "ROLE_ADMIN", "ROLE_HR")
+        .requestMatchers("/api/attendance/hr/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
 
         .anyRequest().authenticated()
       );

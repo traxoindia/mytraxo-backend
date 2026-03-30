@@ -46,7 +46,7 @@ notificationRepository.save(notification);
     // 🔥 CREATE ATTENDANCE ENTRY
     Attendance attendance = new Attendance();
     attendance.setEmployeeId(leave.getEmployeeId());
-    attendance.setDate(leave.getDate()); // ✅ use correct field
+     attendance.setDate(leave.getFromDate()); 
 
     if ("HALF_DAY".equalsIgnoreCase(leave.getType())) {
         attendance.setStatus("HALF_DAY");
@@ -55,7 +55,6 @@ notificationRepository.save(notification);
     }
 
     attendanceRepository.save(attendance);
-
     return repository.save(leave);
 }
 

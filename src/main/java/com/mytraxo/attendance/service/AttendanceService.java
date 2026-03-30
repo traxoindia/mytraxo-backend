@@ -8,6 +8,7 @@ import com.mytraxo.employee.entity.Employee;
 import com.mytraxo.employee.repo.EmployeeRepository;
 
 import com.mytraxo.attendance.dto.AttendanceReportDto;
+import com.mytraxo.attendance.dto.AttendanceStatusDto;
 import com.mytraxo.attendance.dto.CalendarDto;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
@@ -161,5 +162,41 @@ public List<Attendance> getByEmployee(String employeeId) {
                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
+    public List<AttendanceStatusDto> getAllEmployeesAttendanceStatus(LocalDate date) {
+    // 1. Fetch data
+    List<Employee> allEmployees = employeeRepository.findAll();
+    List<Attendance> attendanceRecords = repository.findByDate(date);
+
+    // 2. Map for lookup
+    java.util.Map<String, Attendance> attendanceMap = attendanceRecords.stream()
+            .collect(Collectors.toMap(Attendance::getEmployeeId, a -> a, (existing, replacement) -> existing));
+
+    // 3. Map to DTO
+    return allEmployees.stream().map(emp -> {
+        AttendanceStatusDto dto = new AttendanceStatusDto();
+        
+        dto.setEmployeeId(String.valueOf(emp.getEmployeeId()));
+        dto.setFullName(emp.getFullName()); // Ensure 'F' is capital
+        dto.setDepartment(emp.getDepartment());
+
+        Attendance att = attendanceMap.get(String.valueOf(emp.getEmployeeId()));
+        if (att != null) {
+            // ✅ Fix: Use setCheckInTime (matching your DTO field name)
+            // ✅ Fix: Use .toLocalTime() to convert LocalDateTime -> LocalTime
+            if (att.getCheckIn() != null) {
+                dto.setCheckInTime(att.getCheckIn().toLocalTime());
+            }
+            if (att.getCheckOut() != null) {
+                dto.setCheckOutTime(att.getCheckOut().toLocalTime());
+            }
+            dto.setStatus(att.getStatus());
+        } else {
+            dto.setStatus("ABSENT");
+            dto.setCheckInTime(null);
+            dto.setCheckOutTime(null);
+        }
+        return dto;
+    }).collect(Collectors.toList());
+}
 }
 
