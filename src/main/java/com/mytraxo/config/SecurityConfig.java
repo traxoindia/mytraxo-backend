@@ -60,6 +60,15 @@ public class SecurityConfig {
         .requestMatchers("/api/leave/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
         .requestMatchers("/api/dashboard/**").hasAnyAuthority("ADMIN", "HR", "ROLE_ADMIN", "ROLE_HR")
         .requestMatchers("/api/attendance/hr/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+          // PAYROLL PROTECTION: Only ADMIN or HR should calculate salary
+            .requestMatchers("/api/payroll/generate/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+            .requestMatchers("/api/payroll/settlement").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+            .requestMatchers("/api/payroll/mark-paid/**").hasRole("ADMIN")
+            .requestMatchers("/api/payroll/history/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+            // Inside your securityFilterChain bean:
+            .requestMatchers("/api/payroll/generate-bulk/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+            // Allow employees to see their own records (if you add this later)
+             .requestMatchers("/api/payroll/my-payslips").hasAnyRole("EMPLOYEE", "ADMIN")
 
         .anyRequest().authenticated()
       );

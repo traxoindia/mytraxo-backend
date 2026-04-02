@@ -2,6 +2,9 @@ package com.mytraxo.employee.entity;
 import lombok.Data;
 import lombok.Builder;
 import lombok.*;
+
+import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -61,4 +64,7 @@ public class Employee {
     // Leave employee details
     private String leavingDate;
     private String leavingReason;
+    private Double monthlySalary; // e.g., 50000.0
+   // private String status;        // ACTIVE, INACTIVE, RESIGNED
+    private LocalDate exitDate;   // To be filled during settlement
 }
