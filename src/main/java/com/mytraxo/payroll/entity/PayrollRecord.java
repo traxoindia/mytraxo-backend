@@ -23,7 +23,7 @@ public class PayrollRecord {
     private int year;
 
     private Integer totalDaysInMonth;
-    private Long presentDays;
+    private Double presentDays;
 
     private Double basicPay;
     private Double hra;

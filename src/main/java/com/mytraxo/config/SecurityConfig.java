@@ -69,6 +69,7 @@ public class SecurityConfig {
             .requestMatchers("/api/payroll/generate-bulk/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
             // Allow employees to see their own records (if you add this later)
              .requestMatchers("/api/payroll/my-payslips").hasAnyRole("EMPLOYEE", "ADMIN")
+             .requestMatchers("/api/payroll/download/**").authenticated() 
 
         .anyRequest().authenticated()
       );

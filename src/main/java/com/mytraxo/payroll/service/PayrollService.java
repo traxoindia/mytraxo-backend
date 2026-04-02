@@ -36,10 +36,18 @@ public class PayrollService {
         int totalDays = start.lengthOfMonth();
 
         // Count "PRESENT" from your existing attendance collection
-        long presentDays = attendanceRepository.findByEmployeeIdAndDateBetween(employeeId, start, start.withDayOfMonth(totalDays))
-                .stream()
-                .filter(a -> "PRESENT".equalsIgnoreCase(a.getStatus()))
-                .count();
+       // ✅ BETTER CODE (Counts PRESENT/LATE as 1.0 and HALF_DAY as 0.5)
+double presentDays = attendanceRepository.findByEmployeeIdAndDateBetween(employeeId, start, start.withDayOfMonth(totalDays))
+        .stream()
+        .mapToDouble(a -> {
+            if ("PRESENT".equalsIgnoreCase(a.getStatus()) || "LATE".equalsIgnoreCase(a.getStatus())) {
+                return 1.0;
+            } else if ("HALF_DAY".equalsIgnoreCase(a.getStatus())) {
+                return 0.5;
+            }
+            return 0.0;
+        })
+        .sum();
 
        double monthlyGross = 0.0;
 if (emp.getSalary() != null) {
