@@ -83,27 +83,18 @@ public class PayrollController {
         List<PayrollRecord> history = payrollService.getEmployeePayrollHistory(empId);
         return ResponseEntity.ok(history);
     }
-    @PostMapping("/generate-bulk/{month}/{year}")
-    public ResponseEntity<String> generateBulk(@PathVariable int month, @PathVariable int year) {
-        // 1. Fetch all employees who are currently ACTIVE
-        List<Employee> activeEmployees = employeeRepository.findByEmploymentStatus(EmployeeStatus.ACTIVE);
-        
-        int successCount = 0;
-        int errorCount = 0;
+   // Update your generateBulk in PayrollController.java
+@PostMapping("/generate-bulk/{month}/{year}")
+public ResponseEntity<List<PayrollRecord>> generateBulk(@PathVariable int month, @PathVariable int year) {
+    // This now returns the actual LIST of records to the frontend
+    List<PayrollRecord> records = payrollService.generateBulkPayroll(month, year);
+    return ResponseEntity.ok(records);
+}
 
-        for (Employee emp : activeEmployees) {
-            try {
-                // 2. Reuse your existing single-generate logic
-                payrollService.generateMonthlyPayroll(emp.getEmployeeId(), month, year);
-                successCount++;
-            } catch (Exception e) {
-                // If one employee fails (e.g., missing salary), skip them and continue
-                errorCount++;
-                System.err.println("Failed to generate payroll for: " + emp.getEmployeeId() + " Error: " + e.getMessage());
-            }
-        }
-
-        return ResponseEntity.ok("Successfully generated payroll for " + successCount + " employees. " +
-                                (errorCount > 0 ? "Failed for " + errorCount + " employees." : ""));
-    }
+// Add this NEW method so HR can "View" the records anytime
+@GetMapping("/all/{month}/{year}")
+public ResponseEntity<List<PayrollRecord>> getAllPayroll(@PathVariable int month, @PathVariable int year) {
+    List<PayrollRecord> records = payrollService.getPayrollByMonthAndYear(month, year);
+    return ResponseEntity.ok(records);
+}
 }

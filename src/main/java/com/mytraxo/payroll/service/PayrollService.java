@@ -6,6 +6,8 @@ import com.mytraxo.employee.repo.EmployeeRepository;
 import com.mytraxo.payroll.entity.PayrollRecord;
 import com.mytraxo.payroll.repository.PayrollRepository;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.employee.entity.EmployeeStatus;
+
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.HttpHeaders;
@@ -93,6 +95,29 @@ public PayrollRecord markAsPaid(String payrollId) {
             .orElseThrow(() -> new RuntimeException("Payroll record not found"));
     record.setPaymentStatus("PAID");
     return payrollRepository.save(record);
+}
+// Add these to your PayrollService.java
+
+public List<PayrollRecord> getPayrollByMonthAndYear(int month, int year) {
+    return payrollRepository.findByMonthAndYear(month, year);
+}
+
+public List<PayrollRecord> generateBulkPayroll(int month, int year) {
+    // 1. Get all Active Employees
+    List<Employee> activeEmployees = employeeRepository.findByEmploymentStatus(EmployeeStatus.ACTIVE);
+    
+    for (Employee emp : activeEmployees) {
+        try {
+            // Check if record already exists to avoid duplicates
+            // Optional: if (!payrollRepository.existsByEmployeeIdAndMonthAndYear(...))
+            generateMonthlyPayroll(emp.getEmployeeId(), month, year);
+        } catch (Exception e) {
+            System.err.println("Error for " + emp.getEmployeeId() + ": " + e.getMessage());
+        }
+    }
+    
+    // 2. Return the full list for that month after generation
+    return payrollRepository.findByMonthAndYear(month, year);
 }
 
 public byte[] generatePayslipPdf(String payrollId) {
