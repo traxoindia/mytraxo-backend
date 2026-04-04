@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 public class EmployeeRequest {
 
     // Basic Information
+    private String role;
     private String employeeId;
     private String fullName;
     private String dateOfBirth;
@@ -32,6 +33,7 @@ public class EmployeeRequest {
 
     // Payroll Information
     private String salary;
+    private Double monthlySalary;
     private String bankAccountNumber;
     private String bankName;
     private String ifscCode;

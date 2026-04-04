@@ -34,7 +34,7 @@ public class EmployeeService {
     public Employee updateEmployee(String employeeId, EmployeeRequest request) {
         Employee employee = employeeRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
-
+        employee.setRole(request.getRole()); // <--- ADD THIS
         employee.setFullName(request.getFullName());
         employee.setDateOfBirth(request.getDateOfBirth());
         employee.setGender(request.getGender());
@@ -70,6 +70,7 @@ public class EmployeeService {
         employee.setPanCardDoc(request.getPanCardDoc());
         employee.setOfferLetter(request.getOfferLetter());
         employee.setEducationalCertificates(request.getEducationalCertificates());
+         employee.setMonthlySalary(request.getMonthlySalary());
 
         return employeeRepository.save(employee);
     }
@@ -119,6 +120,7 @@ public class EmployeeService {
 
     private Employee mapRequestToEmployee(EmployeeRequest request) {
         return Employee.builder()
+                .role(request.getRole()) // <--- ADD THIS
                 .employeeId(request.getEmployeeId())
                 .fullName(request.getFullName())
                 .dateOfBirth(request.getDateOfBirth())
@@ -154,6 +156,7 @@ public class EmployeeService {
                 .panCardDoc(request.getPanCardDoc())
                 .offerLetter(request.getOfferLetter())
                 .educationalCertificates(request.getEducationalCertificates())
+                 .monthlySalary(request.getMonthlySalary())
                 .build();
     }
 }

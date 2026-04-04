@@ -96,10 +96,32 @@ public PayrollRecord markAsPaid(String payrollId) {
 }
 
 public byte[] generatePayslipPdf(String payrollId) {
+    // 1. Fetch the requested payroll record from MongoDB
     PayrollRecord record = payrollRepository.findById(payrollId)
             .orElseThrow(() -> new RuntimeException("Payroll record not found"));
 
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+    // 2. Get the Email of the person CURRENTLY logged in (from JWT)
+    String loggedInUserEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    // 3. Find the Employee who OWNS this payroll record
+    Employee ownerOfRecord = employeeRepository.findByEmployeeId(record.getEmployeeId())
+            .orElseThrow(() -> new RuntimeException("Owner of this record not found"));
+
+    // 4. CHECK PERMISSIONS:
+    // Is the logged-in user an ADMIN?
+    boolean isAdminOrHR = SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+            .stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_HR"));
+
+    // Is the logged-in user the OWNER of the record?
+    boolean isOwner = ownerOfRecord.getEmailAddress().equalsIgnoreCase(loggedInUserEmail);
+
+    // 5. BLOCK if neither is true
+    if (!isOwner && !isAdminOrHR) {
+        throw new RuntimeException("SECURITY ALERT: You are not authorized to download this payslip!");
+    }
+
+    // 6. Only if authorized, proceed to generate the PDF...
+    try (ByteArrayOutputStream out = new ByteArrayOutputStream())  {
         Document document = new Document();
         PdfWriter.getInstance(document, out);
         document.open();
