@@ -8,10 +8,13 @@ import com.mytraxo.employee.entity.EmployeeStatus;
 import com.mytraxo.employee.repo.EmployeeRepository;
 import com.mytraxo.employee.util.ResumeParserUtil;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.employee.dto.EmployeeNameDTO;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -159,4 +162,12 @@ public class EmployeeService {
                  .monthlySalary(request.getMonthlySalary())
                 .build();
     }
+  public List<EmployeeNameDTO> getAllEmployeeNames() {
+    return employeeRepository.findAll().stream()
+        .map(emp -> new EmployeeNameDTO(
+            emp.getEmployeeId(), // Use employeeId or id depending on your DTO
+            emp.getFullName()    // Use the field you actually have in your entity
+        ))
+        .collect(Collectors.toList());
+}
 }

@@ -7,6 +7,8 @@ import com.mytraxo.employee.entity.Employee;
 import com.mytraxo.employee.entity.EmployeeStatus;
 import com.mytraxo.employee.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.employee.dto.EmployeeNameDTO;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,5 +80,9 @@ public class HrEmployeeController {
     public ResponseEntity<String> deleteEmployee(@PathVariable String employeeId) {
         employeeService.deleteEmployee(employeeId);
         return ResponseEntity.ok("Employee deleted successfully");
+    }
+     @GetMapping("/names")
+    public ResponseEntity<List<EmployeeNameDTO>> getEmployeeNames() {
+        return ResponseEntity.ok(employeeService.getAllEmployeeNames());
     }
 }
