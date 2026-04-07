@@ -1,12 +1,20 @@
 package com.mytraxo.leave.entity;
 
 import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import org.springframework.data.mongodb.core.index.Indexed;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "leave")
 public class Leave {
 
@@ -20,4 +28,6 @@ public class Leave {
     private String reason;
 
     private String status; // PENDING / APPROVED / REJECTED
+       @Indexed(expireAfterSeconds = 31536000)
+    private Date createdAt;
 }

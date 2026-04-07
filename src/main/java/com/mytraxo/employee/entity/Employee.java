@@ -60,7 +60,7 @@ public class Employee {
     private String panCardDoc;
     private String offerLetter;
     private String educationalCertificates;
-
+  
     // Leave employee details
     private String leavingDate;
     private String leavingReason;

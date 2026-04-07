@@ -24,6 +24,8 @@ public class LeaveService {
     // ✅ Apply Leave
     public Leave applyLeave(Leave leave) {
         leave.setStatus("PENDING");
+           // ✅ ADD THIS: Set createdAt so the leave record deletes after 1 year
+    leave.setCreatedAt(new java.util.Date()); 
         return repository.save(leave);
     }
 
@@ -47,6 +49,9 @@ notificationRepository.save(notification);
     Attendance attendance = new Attendance();
     attendance.setEmployeeId(leave.getEmployeeId());
      attendance.setDate(leave.getFromDate()); 
+
+         // ✅ ADD THIS: For 1-year auto-deletion of the attendance entry
+    attendance.setCreatedAt(new java.util.Date()); 
 
     if ("HALF_DAY".equalsIgnoreCase(leave.getType())) {
         attendance.setStatus("HALF_DAY");

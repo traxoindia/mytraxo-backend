@@ -54,6 +54,8 @@ public class AttendanceService {
         attendance.setEmployeeName(employeeName);
         attendance.setDate(today);
         attendance.setCheckIn(LocalDateTime.now());
+         // ✅ ADD THIS: For 1-year auto-deletion
+    attendance.setCreatedAt(new java.util.Date()); 
 
         // Status Logic
         if (LocalTime.now().isAfter(LocalTime.of(10, 15))) {
@@ -125,6 +127,8 @@ public Attendance checkInWithQR(String employeeId, String qrToken) {
     attendance.setDate(LocalDate.now()); // ✅ MUST HAVE
     attendance.setCheckIn(LocalDateTime.now());
     attendance.setStatus("PRESENT");
+       // ✅ ADD THIS: For 1-year auto-deletion
+    attendance.setCreatedAt(new java.util.Date()); 
 
     return repository.save(attendance);
 }

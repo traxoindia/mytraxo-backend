@@ -70,6 +70,9 @@ public class SecurityConfig {
             // Allow employees to see their own records (if you add this later)
              .requestMatchers("/api/payroll/my-payslips").hasAnyRole("EMPLOYEE", "ADMIN")
              .requestMatchers("/api/payroll/download/**").authenticated() 
+             // 2. YOUR NEW CHANGE: Protect HR Reports
+            // Only users with HR or ADMIN roles can access these
+            .requestMatchers("/api/hr/reports/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
 
         .anyRequest().authenticated()
       );
