@@ -64,4 +64,8 @@ public class HrReportController {
     public List<Employee> employeeSummary(@ModelAttribute ReportRequest request) {
         return reportService.getWiseReport(request, Employee.class, "createdAt");
     }
+    @GetMapping("/leave/all")
+public List<Leave> getAllLeaveReports(@ModelAttribute ReportRequest request) {
+    return reportService.getWiseReport(request, Leave.class, "fromDate");
+}
 }

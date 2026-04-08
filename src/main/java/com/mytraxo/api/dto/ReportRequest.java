@@ -15,4 +15,5 @@ public class ReportRequest {
     private Integer day;   // e.g., 25
     private Integer month; // e.g., 10
     private Integer year;  // e.g., 2023
+    private String status; // 👈 Add this to filter by leave status
 }

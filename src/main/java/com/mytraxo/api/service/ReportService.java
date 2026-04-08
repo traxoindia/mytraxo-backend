@@ -25,6 +25,9 @@ public class ReportService {
         if (request.getEmployeeId() != null && !request.getEmployeeId().isEmpty()) {
             query.addCriteria(Criteria.where("employeeId").is(request.getEmployeeId()));
         }
+        if (request.getStatus() != null && !request.getStatus().isEmpty()) {
+    query.addCriteria(Criteria.where("status").is(request.getStatus()));
+}
 
         // 2. Date Filtering using Range (Fix for ISODate objects)
         if (request.getYear() != null) {
