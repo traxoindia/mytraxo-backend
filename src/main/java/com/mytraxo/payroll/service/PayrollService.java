@@ -104,7 +104,7 @@ public List<PayrollRecord> getPayrollByMonthAndYear(int month, int year) {
 
 public List<PayrollRecord> generateBulkPayroll(int month, int year) {
     // 1. Get all Active Employees
-    List<Employee> activeEmployees = employeeRepository.findByEmploymentStatus(EmployeeStatus.ACTIVE);
+    List<Employee> activeEmployees = employeeRepository.findByEmploymentStatus(EmployeeStatus.CURRENT);
     
     for (Employee emp : activeEmployees) {
         try {

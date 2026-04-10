@@ -49,6 +49,7 @@ public class SecurityConfig {
         .requestMatchers("/api/auth/**").permitAll()
 		// Career public APIs
         .requestMatchers("/api/careers/**").permitAll()
+        .requestMatchers("/api/public/bgv/**").permitAll()// Allow candidate portal access
 
         // ✅ Role protected routes
         .requestMatchers("/api/admin/**").hasRole("ADMIN")

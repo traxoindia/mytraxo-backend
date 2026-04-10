@@ -93,7 +93,7 @@ public void registerEmployee(Employee employee) {
     // 3. Set a default status if none is provided
    if (employee.getEmploymentStatus() == null) {
     // Use your Enum (ACTIVE, CURRENT, etc.)
-    employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.ACTIVE);
+    employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.CURRENT);
 }
 
     // 4. Save to AWS MongoDB

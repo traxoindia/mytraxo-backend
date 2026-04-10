@@ -23,37 +23,45 @@ public class HrEmployeeController {
 
     private final EmployeeService employeeService;
 
-    // New Hire form submit
-    @PostMapping("/new-hire")
-    public ResponseEntity<Employee> createNewHire(@RequestBody EmployeeRequest request) {
-        return ResponseEntity.ok(employeeService.createNewHire(request));
+    // 1. Submit Selection Form
+    @PostMapping("/select")
+    public ResponseEntity<Employee> createSelectedEmployee(@RequestBody EmployeeRequest request) {
+        return ResponseEntity.ok(employeeService.createSelectedEmployee(request));
     }
 
-    // Auto-fill from CV upload
+    // 2. Move Selected -> Onboarding
+    @PutMapping("/{employeeId}/move-onboarding")
+    public ResponseEntity<Employee> moveToOnboarding(@PathVariable String employeeId) {
+        return ResponseEntity.ok(employeeService.moveToOnboarding(employeeId));
+    }
+
+    // 3. Move Onboarding -> Current
+    @PutMapping("/{employeeId}/mark-current")
+    public ResponseEntity<Employee> markAsCurrent(@PathVariable String employeeId) {
+        return ResponseEntity.ok(employeeService.markAsCurrent(employeeId));
+    }
+
     @PostMapping(value = "/upload-resume", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ResumeParseResponse> uploadResume(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(employeeService.parseResume(file));
     }
 
-    // Get all employees
     @GetMapping
     public ResponseEntity<List<Employee>> getAllEmployees() {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
-    // Get employee by employeeId
     @GetMapping("/{employeeId}")
     public ResponseEntity<Employee> getEmployee(@PathVariable String employeeId) {
         return ResponseEntity.ok(employeeService.getByEmployeeId(employeeId));
     }
 
-    // 3 tabs
+    // This handles Selected, Onboarding, Current tabs
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Employee>> getEmployeesByStatus(@PathVariable EmployeeStatus status) {
         return ResponseEntity.ok(employeeService.getByStatus(status));
     }
 
-    // Update employee
     @PutMapping("/{employeeId}")
     public ResponseEntity<Employee> updateEmployee(
             @PathVariable String employeeId,
@@ -61,13 +69,6 @@ public class HrEmployeeController {
         return ResponseEntity.ok(employeeService.updateEmployee(employeeId, request));
     }
 
-    // Move New Hire -> Current
-    @PutMapping("/{employeeId}/mark-current")
-    public ResponseEntity<Employee> markAsCurrent(@PathVariable String employeeId) {
-        return ResponseEntity.ok(employeeService.markAsCurrent(employeeId));
-    }
-
-    // Mark employee as Left
     @PutMapping("/{employeeId}/mark-left")
     public ResponseEntity<Employee> markAsLeft(
             @PathVariable String employeeId,
@@ -75,13 +76,13 @@ public class HrEmployeeController {
         return ResponseEntity.ok(employeeService.markAsLeft(employeeId, request));
     }
 
-    // Delete employee
     @DeleteMapping("/{employeeId}")
     public ResponseEntity<String> deleteEmployee(@PathVariable String employeeId) {
         employeeService.deleteEmployee(employeeId);
         return ResponseEntity.ok("Employee deleted successfully");
     }
-     @GetMapping("/names")
+
+    @GetMapping("/names")
     public ResponseEntity<List<EmployeeNameDTO>> getEmployeeNames() {
         return ResponseEntity.ok(employeeService.getAllEmployeeNames());
     }

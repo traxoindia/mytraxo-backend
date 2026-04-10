@@ -23,66 +23,72 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final ResumeParserUtil resumeParserUtil;
 
-    public Employee createNewHire(EmployeeRequest request) {
+    // 1. Initial State: Create as SELECTED
+    public Employee createSelectedEmployee(EmployeeRequest request) {
         if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
             throw new RuntimeException("Employee ID already exists");
         }
 
         Employee employee = mapRequestToEmployee(request);
-        employee.setEmploymentStatus(EmployeeStatus.NEW_HIRE);
+        employee.setEmploymentStatus(EmployeeStatus.SELECTED); // Changed status to SELECTED
 
+        return employeeRepository.save(employee);
+    }
+
+    // 2. Transition: SELECTED -> ONBOARDING
+    public Employee moveToOnboarding(String employeeId) {
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employee.setEmploymentStatus(EmployeeStatus.ONBOARDING);
+        return employeeRepository.save(employee);
+    }
+
+    // 3. Transition: ONBOARDING -> CURRENT
+    public Employee markAsCurrent(String employeeId) {
+        Employee employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        employee.setEmploymentStatus(EmployeeStatus.CURRENT);
         return employeeRepository.save(employee);
     }
 
     public Employee updateEmployee(String employeeId, EmployeeRequest request) {
         Employee employee = employeeRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
-        employee.setRole(request.getRole()); // <--- ADD THIS
+        
+        employee.setRole(request.getRole());
         employee.setFullName(request.getFullName());
         employee.setDateOfBirth(request.getDateOfBirth());
         employee.setGender(request.getGender());
         employee.setPhoneNumber(request.getPhoneNumber());
         employee.setEmailAddress(request.getEmailAddress());
         employee.setAddress(request.getAddress());
-
         employee.setDepartment(request.getDepartment());
         employee.setDesignation(request.getDesignation());
         employee.setReportingManager(request.getReportingManager());
         employee.setEmployeeType(request.getEmployeeType());
         employee.setDateOfJoining(request.getDateOfJoining());
         employee.setWorkLocation(request.getWorkLocation());
-       // employee.setEmploymentStatus(request.getEmploymentStatus());
-
         employee.setSalary(request.getSalary());
         employee.setBankAccountNumber(request.getBankAccountNumber());
         employee.setBankName(request.getBankName());
         employee.setIfscCode(request.getIfscCode());
         employee.setPanNumber(request.getPanNumber());
-
         employee.setAadhaarNumber(request.getAadhaarNumber());
         employee.setPanCard(request.getPanCard());
         employee.setPassport(request.getPassport());
-
         employee.setEmergencyContactName(request.getEmergencyContactName());
         employee.setEmergencyContactNumber(request.getEmergencyContactNumber());
         employee.setEducationQualification(request.getEducationQualification());
         employee.setPreviousWorkExperience(request.getPreviousWorkExperience());
-
         employee.setResume(request.getResume());
         employee.setAadhaarCard(request.getAadhaarCard());
         employee.setPanCardDoc(request.getPanCardDoc());
         employee.setOfferLetter(request.getOfferLetter());
         employee.setEducationalCertificates(request.getEducationalCertificates());
-         employee.setMonthlySalary(request.getMonthlySalary());
+        employee.setMonthlySalary(request.getMonthlySalary());
 
-        return employeeRepository.save(employee);
-    }
-
-    public Employee markAsCurrent(String employeeId) {
-        Employee employee = employeeRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        employee.setEmploymentStatus(EmployeeStatus.CURRENT);
         return employeeRepository.save(employee);
     }
 
@@ -123,7 +129,7 @@ public class EmployeeService {
 
     private Employee mapRequestToEmployee(EmployeeRequest request) {
         return Employee.builder()
-                .role(request.getRole()) // <--- ADD THIS
+                .role(request.getRole())
                 .employeeId(request.getEmployeeId())
                 .fullName(request.getFullName())
                 .dateOfBirth(request.getDateOfBirth())
@@ -131,43 +137,39 @@ public class EmployeeService {
                 .phoneNumber(request.getPhoneNumber())
                 .emailAddress(request.getEmailAddress())
                 .address(request.getAddress())
-
                 .department(request.getDepartment())
                 .designation(request.getDesignation())
                 .reportingManager(request.getReportingManager())
                 .employeeType(request.getEmployeeType())
                 .dateOfJoining(request.getDateOfJoining())
                 .workLocation(request.getWorkLocation())
-
                 .salary(request.getSalary())
                 .bankAccountNumber(request.getBankAccountNumber())
                 .bankName(request.getBankName())
                 .ifscCode(request.getIfscCode())
                 .panNumber(request.getPanNumber())
-
                 .aadhaarNumber(request.getAadhaarNumber())
                 .panCard(request.getPanCard())
                 .passport(request.getPassport())
-
                 .emergencyContactName(request.getEmergencyContactName())
                 .emergencyContactNumber(request.getEmergencyContactNumber())
                 .educationQualification(request.getEducationQualification())
                 .previousWorkExperience(request.getPreviousWorkExperience())
-
                 .resume(request.getResume())
                 .aadhaarCard(request.getAadhaarCard())
                 .panCardDoc(request.getPanCardDoc())
                 .offerLetter(request.getOfferLetter())
                 .educationalCertificates(request.getEducationalCertificates())
-                 .monthlySalary(request.getMonthlySalary())
+                .monthlySalary(request.getMonthlySalary())
                 .build();
     }
-  public List<EmployeeNameDTO> getAllEmployeeNames() {
-    return employeeRepository.findAll().stream()
-        .map(emp -> new EmployeeNameDTO(
-            emp.getEmployeeId(), // Use employeeId or id depending on your DTO
-            emp.getFullName()    // Use the field you actually have in your entity
-        ))
-        .collect(Collectors.toList());
-}
+
+    public List<EmployeeNameDTO> getAllEmployeeNames() {
+        return employeeRepository.findAll().stream()
+                .map(emp -> new EmployeeNameDTO(
+                        emp.getEmployeeId(),
+                        emp.getFullName()
+                ))
+                .collect(Collectors.toList());
+    }
 }

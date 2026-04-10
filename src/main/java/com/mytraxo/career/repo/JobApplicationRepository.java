@@ -12,5 +12,6 @@ public interface JobApplicationRepository extends MongoRepository<JobApplication
 
     List<JobApplication> findByJobId(String jobId);
     List<JobApplication> findByStage(ApplicationStage stage);
+    JobApplication findByEmailAddress(String emailAddress);
 
 }

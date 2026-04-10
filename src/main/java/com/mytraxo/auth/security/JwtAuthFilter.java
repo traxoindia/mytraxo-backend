@@ -41,7 +41,9 @@ protected boolean shouldNotFilter(HttpServletRequest request) {
 
     return path.startsWith("/api/auth")
         || path.startsWith("/api/careers")   // allow career APIs
+        || path.startsWith("/api/public/bgv") 
         || request.getMethod().equals("OPTIONS");
+        
 }
 
     @Override
@@ -64,10 +66,12 @@ protected boolean shouldNotFilter(HttpServletRequest request) {
 
             Jws<Claims> parsed = jwtService.parse(token);
             String email = parsed.getBody().getSubject();
+            System.out.println("DEBUG FILTER: Token parsed for email: " + email);
 
             User user = userRepository.findByEmail(email).orElse(null);
 
            if (user != null && user.isEnabled()) {
+            System.out.println("DEBUG FILTER: Found as ADMIN/HR");
             // This is your EXACT original logic - No changes here
             UserPrincipal principal = new UserPrincipal(
                     user.getEmail(),
@@ -91,6 +95,8 @@ protected boolean shouldNotFilter(HttpServletRequest request) {
             Employee employee = employeeRepository.findByEmailAddress(email).orElse(null);
             
             if (employee != null) {
+                System.out.println("DEBUG FILTER: Employee found! Setting ROLE_EMPLOYEE for: " + email);
+
                 // We create a simple principal for the employee
                 // This will NOT affect how Admin/HR principals work
                 UsernamePasswordAuthenticationToken authentication =

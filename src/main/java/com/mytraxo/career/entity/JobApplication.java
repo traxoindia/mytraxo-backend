@@ -52,7 +52,8 @@ public class JobApplication {
     // Skills
     private String keySkills;
     private String technicalSkills;
-
+     // ADD THIS LINE BELOW
+    private String department; 
     // Resume
     private String cvFileUrl;
 

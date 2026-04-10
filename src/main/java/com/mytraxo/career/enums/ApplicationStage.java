@@ -7,7 +7,9 @@ public enum ApplicationStage {
     HR_ROUND,
     TECHNICAL_ROUND,
     MANAGERIAL_ROUND,
-    SELECTED,
-    HIRED,
-    REJECTED
+    SELECTED,          // Trigger: Send BGV Link
+    BGV_IN_PROGRESS,   // Candidate is filling Page 1 (Verification)
+    ONBOARDING,        // Candidate is filling Page 2 (Details) & HR Review
+    HIRED, 
+     REJECTED              // Final: Becomes CURRENT employee
 }
