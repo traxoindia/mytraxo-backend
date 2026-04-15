@@ -35,7 +35,11 @@ public class BGVService {
         app.setStage(ApplicationStage.BGV_IN_PROGRESS);
         careerRepo.save(app);
     }
-    
+// Inside BGVService class
+public BGVSubmission getDetailsByToken(String token) {
+    return bgvRepo.findByToken(token)
+            .orElseThrow(() -> new RuntimeException("Error: Invalid or expired BGV link."));
+}
     // This handles the JSON you asked about (Personal, Edu, Employment)
     public void submitVerification(String token, BGVSubmission submissionData) {
         // Use .orElseThrow() to handle the Optional
