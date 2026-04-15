@@ -50,6 +50,9 @@ public class SecurityConfig {
 		// Career public APIs
         .requestMatchers("/api/careers/**").permitAll()
         .requestMatchers("/api/public/bgv/**").permitAll()// Allow candidate portal access
+        // 1. Allow everyone who is logged in to view holidays
+         .requestMatchers("/api/holidays/**").permitAll()
+
 
         // ✅ Role protected routes
         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -74,6 +77,7 @@ public class SecurityConfig {
              // 2. YOUR NEW CHANGE: Protect HR Reports
             // Only users with HR or ADMIN roles can access these
             .requestMatchers("/api/hr/reports/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
+            .requestMatchers("/api/holidays/admin/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
 
         .anyRequest().authenticated()
       );

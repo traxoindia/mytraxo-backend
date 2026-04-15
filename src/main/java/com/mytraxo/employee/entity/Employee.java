@@ -2,7 +2,8 @@ package com.mytraxo.employee.entity;
 import lombok.Data;
 import lombok.Builder;
 import lombok.*;
-
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;

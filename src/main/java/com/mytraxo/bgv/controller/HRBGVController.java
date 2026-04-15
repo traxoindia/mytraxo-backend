@@ -12,9 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/bgv") // All paths start with /api/admin
+@RequestMapping("/api/hr/bgv") // All paths start with /api/hr
 @RequiredArgsConstructor
-public class AdminBGVController {
+public class HRBGVController {
 
     private final BGVService bgvService;
     private final BGVRepository bgvRepo;

@@ -28,12 +28,19 @@ public class EmployeeService {
         if (employeeRepository.existsByEmployeeId(request.getEmployeeId())) {
             throw new RuntimeException("Employee ID already exists");
         }
-
+ 
         Employee employee = mapRequestToEmployee(request);
         employee.setEmploymentStatus(EmployeeStatus.SELECTED); // Changed status to SELECTED
 
         return employeeRepository.save(employee);
     }
+    public Employee saveManualNewHire(Employee employee) {
+    // Set the status to NEW_HIRE automatically
+    employee.setEmploymentStatus(EmployeeStatus.NEW_HIRE);
+    
+    // Save to MongoDB
+    return employeeRepository.save(employee);
+}
 
     // 2. Transition: SELECTED -> ONBOARDING
     public Employee moveToOnboarding(String employeeId) {

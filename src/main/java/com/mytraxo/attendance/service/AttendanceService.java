@@ -3,6 +3,8 @@ package com.mytraxo.attendance.service;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.holiday.service.HolidayService;
+
 import com.mytraxo.employee.entity.Employee;
 
 import com.mytraxo.employee.repo.EmployeeRepository;
@@ -21,6 +23,8 @@ public class AttendanceService {
 
     private final AttendanceRepository repository;
     private final EmployeeRepository employeeRepository;
+    // Inject HolidayService at the top
+    private final HolidayService holidayService; 
 
     // ⏰ Late after 10:15 AM
     private static final LocalTime LATE_TIME = LocalTime.of(10, 15);
@@ -29,43 +33,89 @@ public class AttendanceService {
     private static final double OFFICE_LNG = 86.90728760427798;
     private static final double ALLOWED_RADIUS = 40; // meters
 
+     public List<AttendanceStatusDto> getAllEmployeesAttendanceStatus(LocalDate date) {
+        List<Employee> allEmployees = employeeRepository.findAll();
+        List<Attendance> attendanceRecords = repository.findByDate(date);
+        
+        boolean isHoliday = holidayService.isHoliday(date);
+
+        java.util.Map<String, Attendance> attendanceMap = attendanceRecords.stream()
+                .collect(Collectors.toMap(Attendance::getEmployeeId, a -> a, (existing, replacement) -> existing));
+
+        return allEmployees.stream().map(emp -> {
+            AttendanceStatusDto dto = new AttendanceStatusDto();
+            
+            // 1. Set Basic Info
+            dto.setEmployeeId(String.valueOf(emp.getEmployeeId()));
+            dto.setFullName(emp.getFullName());
+            dto.setDepartment(emp.getDepartment());
+
+            Attendance att = attendanceMap.get(String.valueOf(emp.getEmployeeId()));
+            
+            // 2. Set Status Logic
+            if (att != null) {
+                if (att.getCheckIn() != null) dto.setCheckInTime(att.getCheckIn().toLocalTime());
+                if (att.getCheckOut() != null) dto.setCheckOutTime(att.getCheckOut().toLocalTime());
+                dto.setStatus(att.getStatus());
+            } else {
+                // Determine why they are missing
+                if (isHoliday) {
+                    dto.setStatus("HOLIDAY");
+                } else if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    dto.setStatus("WEEKEND");
+                } else {
+                    dto.setStatus("ABSENT");
+                }
+                dto.setCheckInTime(null);
+                dto.setCheckOutTime(null);
+            }
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
   public Attendance checkIn(String email, double lat, double lng) {
-        // 1. Fetch employee automatically from DB using email
-        Employee employee = employeeRepository.findByEmailAddress(email)
-                .orElseThrow(() -> new RuntimeException("Employee record not found"));
+    // 1. Fetch employee automatically from DB using email
+    Employee employee = employeeRepository.findByEmailAddress(email)
+            .orElseThrow(() -> new RuntimeException("Employee record not found"));
 
-        String employeeId = String.valueOf(employee.getEmployeeId()); 
-        String employeeName = employee.getFullName();
-        LocalDate today = LocalDate.now();
+    String employeeId = String.valueOf(employee.getEmployeeId()); 
+    String employeeName = employee.getFullName();
+    String workLoc = employee.getWorkLocation(); // Get your existing field
+    LocalDate today = LocalDate.now();
 
-        // 2. Prevent duplicate check-in
-        if (repository.findByEmployeeIdAndDate(employeeId, today).isPresent()) {
-            throw new RuntimeException("Already checked in today");
-        }
+    // 2. Prevent duplicate check-in
+    if (repository.findByEmployeeIdAndDate(employeeId, today).isPresent()) {
+        throw new RuntimeException("Already checked in today");
+    }
 
-        // 3. Location Validation
+    // 3. Location Validation (Location Aware)
+    // If the workLocation is NOT "Remote" and NOT "WFH", then check the 40m radius
+    boolean isRemote = "REMOTE".equalsIgnoreCase(workLoc) || "WFH".equalsIgnoreCase(workLoc);
+
+    if (!isRemote) {
         double distance = calculateDistance(lat, lng, OFFICE_LAT, OFFICE_LNG);
         if (distance > ALLOWED_RADIUS) {
-            throw new RuntimeException("You must be within 40 meters of office");
+            throw new RuntimeException("You must be within 40 meters of the office for Office-based work.");
         }
+    }
 
-        Attendance attendance = new Attendance();
-        attendance.setEmployeeId(employeeId);
-        attendance.setEmployeeName(employeeName);
-        attendance.setDate(today);
-        attendance.setCheckIn(LocalDateTime.now());
-         // ✅ ADD THIS: For 1-year auto-deletion
+    // 4. Create Attendance Record
+    Attendance attendance = new Attendance();
+    attendance.setEmployeeId(employeeId);
+    attendance.setEmployeeName(employeeName);
+    attendance.setDate(today);
+    attendance.setCheckIn(LocalDateTime.now());
     attendance.setCreatedAt(new java.util.Date()); 
 
-        // Status Logic
-        if (LocalTime.now().isAfter(LocalTime.of(10, 15))) {
-            attendance.setStatus("LATE");
-        } else {
-            attendance.setStatus("PRESENT");
-        }
-
-        return repository.save(attendance);
+    // Status Logic
+    if (LocalTime.now().isAfter(LATE_TIME)) {
+        attendance.setStatus("LATE");
+    } else {
+        attendance.setStatus("PRESENT");
     }
+
+    return repository.save(attendance);
+}
 
     // ✅ NEW: Automatic Fetch Check-out
     public Attendance checkOut(String email) {
@@ -166,41 +216,6 @@ public List<Attendance> getByEmployee(String employeeId) {
                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
         return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
-    public List<AttendanceStatusDto> getAllEmployeesAttendanceStatus(LocalDate date) {
-    // 1. Fetch data
-    List<Employee> allEmployees = employeeRepository.findAll();
-    List<Attendance> attendanceRecords = repository.findByDate(date);
 
-    // 2. Map for lookup
-    java.util.Map<String, Attendance> attendanceMap = attendanceRecords.stream()
-            .collect(Collectors.toMap(Attendance::getEmployeeId, a -> a, (existing, replacement) -> existing));
-
-    // 3. Map to DTO
-    return allEmployees.stream().map(emp -> {
-        AttendanceStatusDto dto = new AttendanceStatusDto();
-        
-        dto.setEmployeeId(String.valueOf(emp.getEmployeeId()));
-        dto.setFullName(emp.getFullName()); // Ensure 'F' is capital
-        dto.setDepartment(emp.getDepartment());
-
-        Attendance att = attendanceMap.get(String.valueOf(emp.getEmployeeId()));
-        if (att != null) {
-            // ✅ Fix: Use setCheckInTime (matching your DTO field name)
-            // ✅ Fix: Use .toLocalTime() to convert LocalDateTime -> LocalTime
-            if (att.getCheckIn() != null) {
-                dto.setCheckInTime(att.getCheckIn().toLocalTime());
-            }
-            if (att.getCheckOut() != null) {
-                dto.setCheckOutTime(att.getCheckOut().toLocalTime());
-            }
-            dto.setStatus(att.getStatus());
-        } else {
-            dto.setStatus("ABSENT");
-            dto.setCheckInTime(null);
-            dto.setCheckOutTime(null);
-        }
-        return dto;
-    }).collect(Collectors.toList());
-}
 }
 

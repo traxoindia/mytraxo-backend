@@ -23,6 +23,15 @@ public class HrEmployeeController {
 
     private final EmployeeService employeeService;
 
+    
+    @PostMapping("/new-hire")
+    public ResponseEntity<Employee> registerNewHire(@RequestBody Employee employee) {
+        // This method will handle the form data from your UI
+        Employee savedEmployee = employeeService.saveManualNewHire(employee);
+        return ResponseEntity.ok(savedEmployee);
+    }
+
+
     // 1. Submit Selection Form
     @PostMapping("/select")
     public ResponseEntity<Employee> createSelectedEmployee(@RequestBody EmployeeRequest request) {
