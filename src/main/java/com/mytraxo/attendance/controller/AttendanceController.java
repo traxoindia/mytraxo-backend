@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.List;
+import com.mytraxo.attendance.entity.Notification; 
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -89,4 +90,8 @@ public List<AttendanceStatusDto> getAllStatusForHR(
     LocalDate targetDate = (date != null) ? date : LocalDate.now();
     return service.getAllEmployeesAttendanceStatus(targetDate);
 }
+ @GetMapping("/notifications/{employeeId}")
+    public List<Notification> getNotifications(@PathVariable String employeeId) {
+        return service.getNotificationsForEmployee(employeeId);
+    }
 }

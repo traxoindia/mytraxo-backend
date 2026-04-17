@@ -14,6 +14,8 @@ import com.mytraxo.employee.repo.EmployeeRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
+import com.mytraxo.auth.dto.EmployeeRegisterRequest;
+
 import com.mytraxo.auth.dto.EmployeeProfileDTO;
 import com.mytraxo.auth.dto.LoginResponse;
 
@@ -130,6 +132,34 @@ public void registerEmployee(Employee employee) {
     // 4. Save to AWS MongoDB
     employeeRepository.save(employee);
 
+}
+public void registerMobileEmployee(EmployeeRegisterRequest request) {
+    if (employeeRepository.findByEmailAddress(request.getEmailAddress()).isPresent()) {
+        throw new RuntimeException("Employee with this email already exists");
+    }
+
+    Employee employee = new Employee();
+
+    // ✅ STORE EXACTLY AS IT IS: No parsing, no replacing.
+    // If input is "TIA-107", it saves "TIA-107"
+    // If input is "TEST004", it saves "TEST004"
+    employee.setEmployeeId(request.getEmployeeId());
+
+    employee.setFullName(request.getFullName());
+    employee.setEmailAddress(request.getEmailAddress().toLowerCase().trim());
+    employee.setPhoneNumber(request.getPhoneNumber());
+    
+    // ✅ SAVE DESIGNATION
+    employee.setDesignation(request.getDesignation()); 
+
+    // Handle Status
+    if ("ACTIVE".equalsIgnoreCase(request.getEmploymentStatus())) {
+        employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.CURRENT);
+    } else {
+        employee.setEmploymentStatus(com.mytraxo.employee.entity.EmployeeStatus.CURRENT);
+    }
+
+    employeeRepository.save(employee);
 }
     public void register(RegisterRequest req) {
         String email = req.getEmail().toLowerCase();

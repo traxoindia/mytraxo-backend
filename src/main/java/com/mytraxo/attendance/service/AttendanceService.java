@@ -8,7 +8,7 @@ import com.mytraxo.holiday.service.HolidayService;
 import com.mytraxo.employee.entity.Employee;
 
 import com.mytraxo.employee.repo.EmployeeRepository;
-
+import org.springframework.beans.factory.annotation.Qualifier;
 import com.mytraxo.attendance.dto.AttendanceReportDto;
 import com.mytraxo.attendance.dto.AttendanceStatusDto;
 import com.mytraxo.attendance.dto.CalendarDto;
@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 import java.time.*;
 import java.util.List;
+import com.mytraxo.attendance.entity.Notification;
+import com.mytraxo.attendance.repository.NotificationRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,8 @@ public class AttendanceService {
     private final EmployeeRepository employeeRepository;
     // Inject HolidayService at the top
     private final HolidayService holidayService; 
+     @Qualifier("attendanceNotificationRepo") 
+    private final NotificationRepository notificationRepository; // This is for Mobile
 
     // ⏰ Late after 10:15 AM
     private static final LocalTime LATE_TIME = LocalTime.of(10, 15);
@@ -143,9 +147,21 @@ public class AttendanceService {
         return repository.save(attendance);
     }
     private void sendInternalNotification(String empId, String message) {
-        // Here you would eventually call Firebase (FCM) or save to a 'Notifications' collection
-        System.out.println(">>> NOTIFICATION [EmpID: " + empId + "]: " + message);
-    }
+    Notification notification = Notification.builder()
+            .employeeId(empId)
+            .message(message)
+            .date(LocalDate.now())
+            .isRead(false)
+            .build();
+
+    notificationRepository.save(notification); // This saves it to MongoDB
+    System.out.println(">>> NOTIFICATION SAVED IN MONGO [EmpID: " + empId + "]: " + message);
+}
+
+// ALSO ADD THIS METHOD so the controller can call it for the mobile app
+public List<Notification> getNotificationsForEmployee(String employeeId) {
+    return notificationRepository.findByEmployeeIdOrderByDateDesc(employeeId);
+}
 
 public AttendanceReportDto getMonthlyReport(String employeeId, int year, int month) {
 

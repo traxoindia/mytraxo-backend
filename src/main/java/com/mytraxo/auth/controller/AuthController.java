@@ -3,8 +3,7 @@ package com.mytraxo.auth.controller;
 import com.mytraxo.auth.dto.*;
 import com.mytraxo.auth.service.AuthService;
 import jakarta.validation.Valid;
-import com.mytraxo.auth.dto.LoginResponse;
-import com.mytraxo.auth.dto.RegisterRequest;
+import com.mytraxo.auth.dto.EmployeeRegisterRequest;
 
 import com.mytraxo.employee.entity.Employee;
 
@@ -55,5 +54,10 @@ public ResponseEntity<LoginResponse> employeeLogin(@RequestBody LoginRequest req
 public ResponseEntity<?> registerEmployee(@RequestBody Employee request) {
     authService.registerEmployee(request);
     return ResponseEntity.ok("Employee registered successfully in AWS!");
+}
+@PostMapping("/mobile/register-employee")
+public ResponseEntity<?> registerMobileEmployee(@RequestBody EmployeeRegisterRequest request) {
+    authService.registerMobileEmployee(request); // Make sure this call is correct
+    return ResponseEntity.ok("Mobile Employee registered successfully!");
 }
 }
