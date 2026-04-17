@@ -113,7 +113,8 @@ public class AttendanceService {
     } else {
         attendance.setStatus("PRESENT");
     }
-
+// 🔔 4. TRIGGER NOTIFICATION FOR empId (Mobile Requirement)
+        sendInternalNotification(employeeId, "Check-in successful at " + LocalTime.now());
     return repository.save(attendance);
 }
 
@@ -136,9 +137,16 @@ public class AttendanceService {
         if (now.toLocalTime().isBefore(HALF_DAY_TIME)) {
             attendance.setStatus("HALF_DAY");
         }
+        // 🔔 TRIGGER NOTIFICATION FOR empId
+        sendInternalNotification(employeeId, "Check-out successful. Total hours: " + String.format("%.2f", attendance.getWorkingHours()));
 
         return repository.save(attendance);
     }
+    private void sendInternalNotification(String empId, String message) {
+        // Here you would eventually call Firebase (FCM) or save to a 'Notifications' collection
+        System.out.println(">>> NOTIFICATION [EmpID: " + empId + "]: " + message);
+    }
+
 public AttendanceReportDto getMonthlyReport(String employeeId, int year, int month) {
 
     LocalDate start = LocalDate.of(year, month, 1);

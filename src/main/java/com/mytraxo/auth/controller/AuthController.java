@@ -3,6 +3,9 @@ package com.mytraxo.auth.controller;
 import com.mytraxo.auth.dto.*;
 import com.mytraxo.auth.service.AuthService;
 import jakarta.validation.Valid;
+import com.mytraxo.auth.dto.LoginResponse;
+import com.mytraxo.auth.dto.RegisterRequest;
+
 import com.mytraxo.employee.entity.Employee;
 
 import com.mytraxo.employee.repo.EmployeeRepository;
@@ -42,9 +45,11 @@ public class AuthController {
     return ResponseEntity.ok("Logged out");
   }
   @PostMapping("/employee-login")
-public ResponseEntity<AuthResponse> employeeLogin(@RequestBody LoginRequest req) {
-    // req.getEmail() is email, req.getPassword() will be the phone number
-    return ResponseEntity.ok(authService.employeeLogin(req.getEmail(), req.getPassword()));
+public ResponseEntity<LoginResponse> employeeLogin(@RequestBody LoginRequest req) {
+    LoginResponse response = authService.employeeLogin(req.getEmail(), req.getPassword());
+    
+    // Even if it's an error status, we return 200 so the mobile app can read the "status" field
+    return ResponseEntity.ok(response);
 }
 @PostMapping("/register-employee")
 public ResponseEntity<?> registerEmployee(@RequestBody Employee request) {

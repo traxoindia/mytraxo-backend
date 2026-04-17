@@ -23,6 +23,10 @@ public class Leave {
 
     private String employeeId;
     private String type; // FULL_DAY / HALF_DAY
+    // NEW FIELDS FOR MOBILE (Will not affect web)
+    private String leaveCategory; // Casual, Sick, Medical, Other
+    private String applyFor;      // Single Day / Multiple Days
+    private String documentUrl;   // URL for the uploaded file
     private LocalDate fromDate; 
     private LocalDate toDate;
     private String reason;

@@ -19,10 +19,9 @@ public class BGVSubmission {
     private String id;
     private String applicationId;
     private String emailAddress;
-    private String token; // Unique UUID for the link
-    private String status; // PENDING, BGV_SUBMITTED, ONBOARDING_SUBMITTED, APPROVED, REJECTED
+    private String token; 
+    private String status; 
 
-    // 1. Personal & Identity Information
     private String fullName;
     private String dob;
     private String contactNumber;
@@ -34,32 +33,52 @@ public class BGVSubmission {
     private String panNumber;
     private String passportNumber;
 
-    // 2. Educational Verification (List for 10th, 12th, Graduation)
+    // Lists for helper classes
     private List<EducationDetail> educationDetails;
-
-    // 3. Employment Verification
     private List<EmploymentDetail> employmentHistory;
-    private String lastDrawnSalary;
-    private String criminalRecordDeclaration; // Self-declaration text
-
-    // 4. References
     private List<ReferenceDetail> references;
 
-    // 5. Bank Details (Collected in Onboarding Page)
+    private String lastDrawnSalary;
+    private String criminalRecordDeclaration; 
+
     private String bankName;
     private String accountNumber;
     private String ifscCode;
 
-    // 6. Documents (Key: Document Type, Value: File Path in /uploads)
     private Map<String, String> documentPaths;
-    // You can also add a helper list to track which documents are mandatory
-public static final List<String> MANDATORY_DOCS = List.of(
-    "10th Marksheet", "12th Marksheet", "Highest Degree", 
-    "Aadhar Card", "PAN Card", "Passport Photo"
-);
-}
 
-// Helper Classes (Inner or separate files)
-class EducationDetail { String level; String institute; String passingYear; String percentage; }
-class EmploymentDetail { String company; String designation; String duration; String hrContact; }
-class ReferenceDetail { String name; String company; String contact; }
+    public static final List<String> MANDATORY_DOCS = List.of(
+        "10th Marksheet", "12th Marksheet", "Highest Degree", 
+        "Aadhar Card", "PAN Card", "Passport Photo"
+    );
+
+    // ✅ FIXED HELPER CLASSES: Added static and Lombok annotations
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EducationDetail { 
+        private String level; 
+        private String institute; 
+        private String passingYear; 
+        private String percentage; 
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EmploymentDetail { 
+        private String company; 
+        private String designation; 
+        private String duration; 
+        private String hrContact; 
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReferenceDetail { 
+        private String name; 
+        private String company; 
+        private String contact; 
+    }
+}

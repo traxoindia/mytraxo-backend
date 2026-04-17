@@ -62,6 +62,23 @@ notificationRepository.save(notification);
     attendanceRepository.save(attendance);
     return repository.save(leave);
 }
+public Leave applyLeaveMobile(Leave leave, String filePath) {
+    leave.setStatus("PENDING");
+    leave.setCreatedAt(new java.util.Date()); 
+    leave.setDocumentUrl(filePath); // Save the file path if provided
+    
+    Leave savedLeave = repository.save(leave);
+    
+    // Trigger notification logic for the mobile app requirement
+    Notification notification = new Notification();
+    notification.setEmployeeId(leave.getEmployeeId());
+    notification.setMessage("New " + leave.getLeaveCategory() + " leave request submitted.");
+    notification.setType("LEAVE_REQUEST");
+    notification.setCreatedAt(LocalDateTime.now());
+    notificationRepository.save(notification);
+    
+    return savedLeave;
+}
 
     // ✅ Reject Leave
     public Leave reject(String id) {

@@ -14,6 +14,9 @@ import com.mytraxo.employee.repo.EmployeeRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
+import com.mytraxo.auth.dto.EmployeeProfileDTO;
+import com.mytraxo.auth.dto.LoginResponse;
+
 import com.mytraxo.employee.entity.EmployeeStatus;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -53,34 +57,61 @@ public class AuthService {
     }
 
     // ✅ Corrected Employee Login
-    public AuthResponse employeeLogin(String email, String password) {
-      
-        // 1. Fetch from Mongo Repo using correct method name
-        Employee emp = employeeRepository.findByEmailAddress(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-// 🛡️ SECURITY CHECK: Don't allow employees who have "LEFT" to login
-    if ("LEFT".equalsIgnoreCase(emp.getEmploymentStatus().name())) {
-        throw new RuntimeException("Access Denied: You are no longer an active employee.");
-    }
-        // 2. Validate phone number as password
-        if (!emp.getPhoneNumber().equals(password)) {
-            throw new RuntimeException("Invalid Credentials");
-        }
+    // Inside AuthService.java
 
-        // 3. Generate Tokens (Declared variables properly)
-         List<String> roles = List.of("ROLE_EMPLOYEE");
+public LoginResponse employeeLogin(String email, String password) {
+    // 1. Fetch from Mongo Repo
+    Optional<Employee> empOpt = employeeRepository.findByEmailAddress(email.toLowerCase().trim());
+
+    // ❌ CHECK 1: Email Existence
+    if (empOpt.isEmpty()) {
+        return LoginResponse.builder()
+                .status("INVALID_EMAIL")
+                .message("No account found with this email.")
+                .build();
+    }
+
+    Employee emp = empOpt.get();
+
+    // ❌ CHECK 2: Account Status
+    if (emp.getEmploymentStatus() != null && "LEFT".equalsIgnoreCase(emp.getEmploymentStatus().name())) {
+        return LoginResponse.builder()
+                .status("ACCESS_DENIED")
+                .message("This account is no longer active.")
+                .build();
+    }
+
+    // ❌ CHECK 3: Password (Phone Number)
+    if (!emp.getPhoneNumber().equals(password)) {
+        return LoginResponse.builder()
+                .status("INVALID_PASSWORD")
+                .message("Incorrect password.")
+                .build();
+    }
+
+    // ✅ SUCCESS: Generate Real JWT Tokens
+    List<String> roles = List.of("ROLE_EMPLOYEE");
     String access = jwtService.generateAccessToken(emp.getEmailAddress(), roles);
     String refresh = jwtService.generateRefreshToken(emp.getEmailAddress());
 
-    return AuthResponse.builder()
+    // Map Entity to DTO for Mobile UI
+    EmployeeProfileDTO profile = new EmployeeProfileDTO(
+        emp.getEmployeeId(),
+        emp.getFullName(),
+        emp.getEmailAddress(),
+        emp.getPhoneNumber(),
+        emp.getDesignation(),
+        "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // Placeholder or emp.getProfilePic()
+    );
+
+    return LoginResponse.builder()
+            .status("SUCCESS")
+            .message("Login successful")
             .accessToken(access)
             .refreshToken(refresh)
-            .roles(roles)
-            .employeeId(emp.getEmployeeId()) // From Employee Entity
-            .name(emp.getFullName())  // Combine names
-           // .status(emp.getEmploymentStatus().name()) // Enum to String
+            .profile(profile)
             .build();
-    }
+}
 public void registerEmployee(Employee employee) {
     // 1. Check if email already exists
     if (employeeRepository.findByEmailAddress(employee.getEmailAddress()).isPresent()) {

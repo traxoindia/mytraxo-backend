@@ -10,7 +10,7 @@ import com.mytraxo.attendance.dto.CheckOutRequest;
 import com.mytraxo.attendance.dto.QRRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -42,7 +42,6 @@ public Attendance checkOut(java.security.Principal principal) {
     // 2. No request body needed for check-out
     return service.checkOut(email);
 }
-
 
     // ✅ 3. GET ATTENDANCE BY EMPLOYEE
     @GetMapping("/{employeeId}")

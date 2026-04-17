@@ -56,9 +56,10 @@ public class SecurityConfig {
 
         // ✅ Role protected routes
         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-        .requestMatchers("/api/hr/**").hasRole("HR")
+        .requestMatchers("/api/hr/**").hasAnyAuthority("HR","ROLE_HR")
         .requestMatchers("/api/user/**").hasRole("USER")
         .requestMatchers("/api/attendance/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
+        .requestMatchers("/api/attendance/mobile/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")
         // TO THIS (Temporary):
 //.requestMatchers("/api/attendance/**").authenticated()
         .requestMatchers("/api/leave/**").hasAnyRole("USER","HR","ADMIN","EMPLOYEE")

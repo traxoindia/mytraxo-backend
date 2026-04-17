@@ -6,6 +6,7 @@ import com.mytraxo.bgv.repo.BGVRepository;
 
 import com.mytraxo.bgv.entity.BGVSubmission;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -42,6 +43,10 @@ public class HRBGVController {
         // We return the whole object (Frontend will pick what it needs)
         return ResponseEntity.ok(submission);
     }
+    @GetMapping("/list")
+public ResponseEntity<List<BGVSubmission>> getAllBgvApplications() {
+    return ResponseEntity.ok(bgvRepo.findAll());
+}
     // Approve the BGV stage and move to Onboarding
     @PostMapping("/{bgvId}/approve-bgv")
     public ResponseEntity<String> approveBGV(@PathVariable String bgvId) {
