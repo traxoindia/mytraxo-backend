@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 @Data
 @Builder
@@ -26,4 +27,7 @@ public class Notification {
     
     @Builder.Default 
     private boolean read = false;
+    // ✅ ADD THIS FOR AUTO-DELETE AFTER 1 YEAR
+    @Indexed(expireAfterSeconds = 31536000)
+    private java.util.Date createdAt; 
 }

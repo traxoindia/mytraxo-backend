@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.HashMap;
 import java.util.Map;
 import com.mytraxo.bgv.dto.OnboardingRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,17 +33,24 @@ public class PublicBGVController {
     private final String UPLOAD_DIR = "uploads/bgv_docs/";
 
     // PAGE 1: Background Verification Details
-    @PostMapping("/submit-verification")
+@PostMapping("/submit-verification")
     public String saveVerification(@RequestParam String token, @RequestBody BGVSubmission data) {
         BGVSubmission bgv = bgvRepo.findByToken(token).orElseThrow();
         bgv.setFullName(data.getFullName());
-        bgv.setDob(data.getDob());
-        bgv.setEducationDetails(data.getEducationDetails());
-        bgv.setEmploymentHistory(data.getEmploymentHistory());
+    bgv.setDob(data.getDob());
+    bgv.setContactNumber(data.getContactNumber());
+    bgv.setAadharNumber(data.getAadharNumber());
+    bgv.setPanNumber(data.getPanNumber());
+    bgv.setLastDrawnSalary(data.getLastDrawnSalary());
+    bgv.setCriminalRecordDeclaration(data.getCriminalRecordDeclaration());
+    bgv.setEducationDetails(data.getEducationDetails());
+    bgv.setEmploymentHistory(data.getEmploymentHistory());
+    bgv.setReferences(data.getReferences());
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);
         return "Verification details saved. Proceed to Onboarding Page.";
     }
+
 
     // PAGE 2: Onboarding & Bank Details
     @PostMapping("/submit-onboarding/{bgvId}")

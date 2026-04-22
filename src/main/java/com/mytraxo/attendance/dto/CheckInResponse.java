@@ -13,4 +13,5 @@ import lombok.AllArgsConstructor;
 public class CheckInResponse {
     private Attendance attendance;
     private String message;
+    private String title; // ✅ Add this field
 }

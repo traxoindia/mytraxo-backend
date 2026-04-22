@@ -117,12 +117,13 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
     attendance.setStatus(LocalTime.now().isAfter(LATE_TIME) ? "LATE" : "PRESENT");
 
     Attendance saved = repository.save(attendance);
+    String title = "Check-in Successful";
 
     // Trigger Notification (Existing)
-    sendMobileNotification(empId, "Check-in Successful", message, "ATTENDANCE");
+    sendMobileNotification(empId, title, message, "ATTENDANCE");
 
     // Return the new Response DTO with the message
-    return new CheckInResponse(saved, message);
+    return new CheckInResponse(saved, message,title);
 }
 
   public Attendance checkIn(String email, double lat, double lng) {
