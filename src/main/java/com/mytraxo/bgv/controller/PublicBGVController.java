@@ -3,6 +3,11 @@ package com.mytraxo.bgv.controller;
 import org.springframework.http.ResponseEntity;
 import com.mytraxo.bgv.entity.BGVSubmission;
 import com.mytraxo.bgv.repo.BGVRepository;
+
+import com.mytraxo.employee.entity.Employee;
+
+import com.mytraxo.employee.repo.EmployeeRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,12 +18,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import com.mytraxo.bgv.dto.OnboardingRequest;
+import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/public/bgv")
 public class PublicBGVController {
 
-    @Autowired private BGVRepository bgvRepo;
+   
+   private final BGVRepository bgvRepo;
+    private final EmployeeRepository employeeRepository;
     private final String UPLOAD_DIR = "uploads/bgv_docs/";
 
     // PAGE 1: Background Verification Details
@@ -35,17 +45,25 @@ public class PublicBGVController {
     }
 
     // PAGE 2: Onboarding & Bank Details
-    @PostMapping("/submit-onboarding")
-    public String saveOnboarding(@RequestParam String token, @RequestBody BGVSubmission data) {
-        BGVSubmission bgv = bgvRepo.findByToken(token).orElseThrow();
-        bgv.setBankName(data.getBankName());
-        bgv.setAccountNumber(data.getAccountNumber());
-        bgv.setIfscCode(data.getIfscCode());
-        bgv.setCurrentAddress(data.getCurrentAddress());
-        bgv.setStatus("SUBMITTED"); // Final submission status
-        bgvRepo.save(bgv);
-        return "All details submitted successfully. HR will review.";
-    }
+    @PostMapping("/submit-onboarding/{bgvId}")
+public ResponseEntity<?> submitOnboarding(@PathVariable String bgvId, @RequestBody OnboardingRequest request) {
+    
+    BGVSubmission bgv = bgvRepo.findById(bgvId)
+            .orElseThrow(() -> new RuntimeException("Invalid BGV ID"));
+
+    // Save Bank & Emergency info into the BGV record instead of Employee
+    bgv.setBankName(request.getBankName());
+    bgv.setAccountNumber(request.getAccountNumber());
+    bgv.setIfscCode(request.getIfscCode());
+    bgv.setEmergencyContactName(request.getEmergencyContactName());
+    bgv.setEmergencyContactNumber(request.getEmergencyContactNumber());
+    
+    bgv.setStatus("ONBOARDING_SUBMITTED");
+    bgvRepo.save(bgv);
+
+    return ResponseEntity.ok("Onboarding details saved");
+}
+    
 
     // FILE UPLOAD HANDLER
     @PostMapping("/upload-docs")

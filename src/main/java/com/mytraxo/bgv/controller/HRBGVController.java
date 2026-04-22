@@ -47,12 +47,20 @@ public class HRBGVController {
 public ResponseEntity<List<BGVSubmission>> getAllBgvApplications() {
     return ResponseEntity.ok(bgvRepo.findAll());
 }
+        @GetMapping("/pending-approval")
+public ResponseEntity<List<BGVSubmission>> getPendingApprovals() {
+    return ResponseEntity.ok(bgvRepo.findByStatus("BGV_SUBMITTED"));
+}
+
     // Approve the BGV stage and move to Onboarding
-    @PostMapping("/{bgvId}/approve-bgv")
-    public ResponseEntity<String> approveBGV(@PathVariable String bgvId) {
-        bgvService.approveBGVStage(bgvId);
-        return ResponseEntity.ok("BGV Approved. Candidate moved to Onboarding stage.");
-    }
+   @PostMapping("/{bgvId}/approve-bgv")
+public ResponseEntity<String> approveBGV(@PathVariable String bgvId) {
+    // 1. Service now returns the generated Employee ID
+    String employeeId = bgvService.approveBGVStage(bgvId); 
+    
+    // 2. Return a message that includes the ID so HR knows the onboarding link
+    return ResponseEntity.ok("Approved! Candidate moved to onboarding. ID: " + employeeId);
+}
 
     // Reject the candidate
     @PostMapping("/{bgvId}/reject")
@@ -60,6 +68,31 @@ public ResponseEntity<List<BGVSubmission>> getAllBgvApplications() {
         bgvService.rejectCandidateProcess(bgvId);
         return ResponseEntity.ok("Candidate has been rejected.");
     }
+     /**
+     * BULK APPROVE BGV
+     * Frontend sends a list of BGV IDs.
+     * This moves them from "BGV Submitted" to "Onboarding" status and creates Employee records.
+     */
+    @PostMapping("/bulk-approve")
+    public ResponseEntity<Map<String, String>> bulkApprove(@RequestBody List<String> bgvIds) {
+        Map<String, String> results = new java.util.HashMap<>();
+        for (String id : bgvIds) {
+            try {
+                bgvService.approveBGVStage(id);
+                results.put(id, "Approved and moved to Onboarding");
+            } catch (Exception e) {
+                results.put(id, "Error: " + e.getMessage());
+            }
+        }
+        return ResponseEntity.ok(results);
+    }
+
+// 2. Get candidates who SUBMITTED ONBOARDING (Ready for HR Bulk Finalize)
+@GetMapping("/ready-to-finalize")
+public ResponseEntity<List<BGVSubmission>> getReadyToFinalize() {
+    return ResponseEntity.ok(bgvRepo.findByStatus("ONBOARDING_SUBMITTED"));
+}
+
 
     // Finalize Onboarding and make them a CURRENT employee
     @PostMapping("/finalize/{empId}")
@@ -67,4 +100,10 @@ public ResponseEntity<List<BGVSubmission>> getAllBgvApplications() {
         bgvService.finalizeEmployee(empId);
         return ResponseEntity.ok("Onboarding finalized. Employee is now CURRENT.");
     }
+        @PostMapping("/bulk-finalize")
+    public ResponseEntity<Map<String, String>> bulkFinalize(@RequestBody List<String> empIds) {
+        Map<String, String> results = bgvService.bulkFinalizeEmployees(empIds);
+        return ResponseEntity.ok(results);
+    }
+
 }

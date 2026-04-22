@@ -3,6 +3,8 @@ package com.mytraxo.leave.service;
 import com.mytraxo.leave.entity.Leave;
 import com.mytraxo.leave.repository.LeaveRepository;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.attendance.service.AttendanceService;
+
 import org.springframework.stereotype.Service;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.repository.AttendanceRepository;
@@ -20,6 +22,7 @@ public class LeaveService {
     private final LeaveRepository repository;
     private final AttendanceRepository attendanceRepository;
     private final NotificationRepository notificationRepository;
+    private final AttendanceService attendanceService; 
     
     // ✅ Apply Leave
     public Leave applyLeave(Leave leave) {
@@ -45,23 +48,32 @@ notification.setCreatedAt(LocalDateTime.now());
 
 notificationRepository.save(notification);
 
+
     // 🔥 CREATE ATTENDANCE ENTRY
-    Attendance attendance = new Attendance();
-    attendance.setEmployeeId(leave.getEmployeeId());
-     attendance.setDate(leave.getFromDate()); 
+     // 2. MOBILE Notification (Call the Service, not the entity)
+        // Note: Used getFromDate() because your entity seems to use that field
+        attendanceService.sendMobileNotification(
+             leave.getEmployeeId(),
+            "Leave Approved", 
+           "Your leave for " + leave.getFromDate() + " is approved", 
+            "LEAVE"
+        );
 
-         // ✅ ADD THIS: For 1-year auto-deletion of the attendance entry
-    attendance.setCreatedAt(new java.util.Date()); 
+        // 3. CREATE ATTENDANCE ENTRY
+        Attendance attendance = new Attendance();
+        attendance.setEmployeeId(leave.getEmployeeId());
+        attendance.setDate(leave.getFromDate()); 
+        attendance.setCreatedAt(new java.util.Date()); 
 
-    if ("HALF_DAY".equalsIgnoreCase(leave.getType())) {
-        attendance.setStatus("HALF_DAY");
-    } else {
-        attendance.setStatus("LEAVE");
+        if ("HALF_DAY".equalsIgnoreCase(leave.getType())) {
+            attendance.setStatus("HALF_DAY");
+        } else {
+            attendance.setStatus("LEAVE");
+        }
+
+        attendanceRepository.save(attendance);
+        return repository.save(leave);
     }
-
-    attendanceRepository.save(attendance);
-    return repository.save(leave);
-}
 public Leave applyLeaveMobile(Leave leave, String filePath) {
     leave.setStatus("PENDING");
     leave.setCreatedAt(new java.util.Date()); 

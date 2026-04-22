@@ -5,6 +5,9 @@ import lombok.*;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -30,6 +33,7 @@ public class Employee {
 
     // Job Information
     private String department;
+     @JsonProperty("designation") 
     private String designation;
     private String reportingManager;
     private String employeeType;
@@ -68,4 +72,47 @@ public class Employee {
     private Double monthlySalary; // e.g., 50000.0
    // private String status;        // ACTIVE, INACTIVE, RESIGNED
     private LocalDate exitDate;   // To be filled during settlement
+    // ==========================================
+    // NEW FIELDS FOR MOBILE (ADDITIVE - WON'T BREAK WEB)
+    // ==========================================
+
+    
+   // --- CLEAN NAMES FOR MOBILE (LISTS) ---
+    private List<String> designations;      // Plural: List for Mobile
+    private List<WorkExperienceDetail> workHistory;
+    private List<EducationDetail> educationHistory;
+
+    
+    private String bloodGroup;
+    private String maritalStatus;
+
+    
+    private String employmentStage; 
+    private boolean selfServiceOn;
+    private String probationEndDate;
+    private String dateOfConfirmation;
+    private String officeAddressDetail;
+
+    // --- HELPER CLASSES (Nested inside Employee class) ---
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class WorkExperienceDetail {
+        private String role;
+        private String duration;
+        private String dateRange;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class EducationDetail {
+        private String level;
+        private String year;
+        private String degree;
+        private String institution;
+    }
 }

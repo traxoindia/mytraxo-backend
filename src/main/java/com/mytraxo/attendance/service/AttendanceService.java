@@ -3,6 +3,12 @@ package com.mytraxo.attendance.service;
 import com.mytraxo.attendance.entity.Attendance;
 import com.mytraxo.attendance.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.attendance.dto.CheckInResponse;
+
+import com.mytraxo.attendance.dto.MobileCheckInRequest;
+
+import com.mytraxo.attendance.dto.CheckInRequest;
+
 import com.mytraxo.holiday.service.HolidayService;
 
 import com.mytraxo.employee.entity.Employee;
@@ -76,6 +82,48 @@ public class AttendanceService {
             return dto;
         }).collect(Collectors.toList());
     }
+  // Inside AttendanceService.java
+public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
+    String empId = request.getEmployeeId();
+    LocalDate today = LocalDate.now();
+
+    Employee employee = employeeRepository.findByEmployeeId(empId)
+            .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+    String workLoc = employee.getWorkLocation();
+    boolean isRemote = "REMOTE".equalsIgnoreCase(workLoc) || "WFH".equalsIgnoreCase(workLoc);
+
+    if (repository.findByEmployeeIdAndDate(empId, today).isPresent()) {
+        throw new RuntimeException("Already checked in today");
+    }
+
+    String message;
+    if (isRemote) {
+        message = "Remote Check-in Successful";
+    } else {
+        double distance = calculateDistance(request.getLat(), request.getLng(), OFFICE_LAT, OFFICE_LNG);
+        if (distance > ALLOWED_RADIUS) {
+            throw new RuntimeException("Location mismatch: You must be at the office.");
+        }
+        message = "Office Check-in Successful";
+    }
+
+    Attendance attendance = new Attendance();
+    attendance.setEmployeeId(empId);
+    attendance.setEmployeeName(employee.getFullName());
+    attendance.setDate(today);
+    attendance.setCheckIn(LocalDateTime.now());
+    attendance.setCreatedAt(new java.util.Date());
+    attendance.setStatus(LocalTime.now().isAfter(LATE_TIME) ? "LATE" : "PRESENT");
+
+    Attendance saved = repository.save(attendance);
+
+    // Trigger Notification (Existing)
+    sendMobileNotification(empId, "Check-in Successful", message, "ATTENDANCE");
+
+    // Return the new Response DTO with the message
+    return new CheckInResponse(saved, message);
+}
 
   public Attendance checkIn(String email, double lat, double lng) {
     // 1. Fetch employee automatically from DB using email
@@ -118,8 +166,9 @@ public class AttendanceService {
         attendance.setStatus("PRESENT");
     }
 // 🔔 4. TRIGGER NOTIFICATION FOR empId (Mobile Requirement)
-        sendInternalNotification(employeeId, "Check-in successful at " + LocalTime.now());
+        sendMobileNotification(employeeId, "Check-in", "Successful at " + LocalTime.now(), "ATTENDANCE");
     return repository.save(attendance);
+    
 }
 
     // ✅ NEW: Automatic Fetch Check-out
@@ -142,20 +191,22 @@ public class AttendanceService {
             attendance.setStatus("HALF_DAY");
         }
         // 🔔 TRIGGER NOTIFICATION FOR empId
-        sendInternalNotification(employeeId, "Check-out successful. Total hours: " + String.format("%.2f", attendance.getWorkingHours()));
+        sendMobileNotification(employeeId, "Check-out", "Successful. Hours: " + attendance.getWorkingHours(), "ATTENDANCE");
 
         return repository.save(attendance);
     }
-    private void sendInternalNotification(String empId, String message) {
+  
+public void sendMobileNotification(String empId, String title, String message, String type) {
     Notification notification = Notification.builder()
             .employeeId(empId)
+            .title(title)
             .message(message)
+            .type(type)
             .date(LocalDate.now())
-            .isRead(false)
+            .read(false)
             .build();
 
-    notificationRepository.save(notification); // This saves it to MongoDB
-    System.out.println(">>> NOTIFICATION SAVED IN MONGO [EmpID: " + empId + "]: " + message);
+    notificationRepository.save(notification);
 }
 
 // ALSO ADD THIS METHOD so the controller can call it for the mobile app

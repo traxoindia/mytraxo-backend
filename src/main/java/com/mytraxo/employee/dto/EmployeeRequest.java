@@ -3,6 +3,10 @@ package com.mytraxo.employee.dto;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import com.mytraxo.employee.entity.Employee;
+
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 
 
@@ -56,4 +60,14 @@ public class EmployeeRequest {
     private String panCardDoc;
     private String offerLetter;
     private String educationalCertificates;
+    private List<String> designations; 
+    private List<Employee.WorkExperienceDetail> workHistory;
+    private List<Employee.EducationDetail> educationHistory;
+    private String bloodGroup;
+    private String maritalStatus;
+    private String employmentStage; 
+    private boolean selfServiceOn;
+    private String probationEndDate;
+    private String dateOfConfirmation;
+    private String officeAddressDetail;
 }

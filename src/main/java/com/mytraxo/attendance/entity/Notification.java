@@ -16,13 +16,14 @@ import java.time.LocalDateTime;
 
 @Document(collection = "notifications") // SEPARATE collection = NO impact on web
 public class Notification {
-    @Id
+      @Id
     private String id;
-    
     private String employeeId;
+    private String title;      // e.g., "Check-in Successful", "Leave Approved"
+    private String message;    // e.g., "You checked in at 09:00 AM"
+    private String type;       // e.g., "ATTENDANCE", "LEAVE", "PAYROLL"
+    private LocalDate date;
     
-    private String message;
-     private java.time.LocalDate date;
-     @Builder.Default // ✅ ADD THIS LINE to fix the warning
-    private boolean isRead = false;
+    @Builder.Default 
+    private boolean read = false;
 }

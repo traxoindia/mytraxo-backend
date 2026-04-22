@@ -1,5 +1,6 @@
 package com.mytraxo.attendance.dto;
 
+import com.mytraxo.attendance.entity.Attendance;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -8,8 +9,8 @@ import lombok.AllArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor  // Required for JSON parsing
-@AllArgsConstructor // Required for @Builder
-public class CheckInRequest {
-    private double lat;
-    private double lng;
+@AllArgsConstructor
+public class CheckInResponse {
+    private Attendance attendance;
+    private String message;
 }

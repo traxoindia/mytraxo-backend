@@ -9,6 +9,10 @@ import com.mytraxo.attendance.dto.CheckInRequest;
 import com.mytraxo.attendance.dto.CheckOutRequest;
 import com.mytraxo.attendance.dto.QRRequest;
 import lombok.RequiredArgsConstructor;
+import com.mytraxo.attendance.dto.CheckInResponse;
+
+import com.mytraxo.attendance.dto.MobileCheckInRequest;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
@@ -24,16 +28,26 @@ public class AttendanceController {
 
      // ✅ AUTOMATIC CHECK-IN
     // Frontend body: { "lat": 22.5, "lng": 88.3 }
-  @PostMapping("/check-in")
-// Changed LocationRequest to CheckInRequest
+  
+@PostMapping("/check-in")
 public Attendance checkIn(java.security.Principal principal, @RequestBody CheckInRequest request) {
-    
-    // 1. Automatic Fetch: Get email from the Token
     String email = principal.getName(); 
-    
-    // 2. Call Service with email and coordinates from your DTO
     return service.checkIn(email, request.getLat(), request.getLng());
 }
+
+// --- ADD THIS FOR MOBILE (New Path) ---
+@PostMapping("/mobile/check-in")
+public ResponseEntity<?> mobileCheckIn(@RequestBody MobileCheckInRequest request) {
+    try {
+        // Now returns CheckInResponse
+        CheckInResponse response = service.mobileCheckInProcess(request);
+        return ResponseEntity.ok(response);
+    } catch (RuntimeException e) {
+        // This is where "Location mismatch" will show up if it fails
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}
+
 
 @PostMapping("/check-out")
 public Attendance checkOut(java.security.Principal principal) {

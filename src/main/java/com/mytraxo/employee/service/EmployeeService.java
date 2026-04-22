@@ -95,6 +95,18 @@ public class EmployeeService {
         employee.setOfferLetter(request.getOfferLetter());
         employee.setEducationalCertificates(request.getEducationalCertificates());
         employee.setMonthlySalary(request.getMonthlySalary());
+        // --- NEW: Add Mobile Fields here ---
+    employee.setDesignations(request.getDesignations());      
+    employee.setWorkHistory(request.getWorkHistory());        
+    employee.setEducationHistory(request.getEducationHistory());
+    employee.setBloodGroup(request.getBloodGroup());
+    employee.setMaritalStatus(request.getMaritalStatus());
+    employee.setEmploymentStage(request.getEmploymentStage());
+    employee.setSelfServiceOn(request.isSelfServiceOn());
+    employee.setProbationEndDate(request.getProbationEndDate());
+    employee.setDateOfConfirmation(request.getDateOfConfirmation());
+    employee.setOfficeAddressDetail(request.getOfficeAddressDetail());
+
 
         return employeeRepository.save(employee);
     }
@@ -168,8 +180,25 @@ public class EmployeeService {
                 .offerLetter(request.getOfferLetter())
                 .educationalCertificates(request.getEducationalCertificates())
                 .monthlySalary(request.getMonthlySalary())
-                .build();
+                 // --- New Mobile Fields (Additive) ---
+            .designations(request.getDesignations())
+            .workHistory(request.getWorkHistory())
+            .educationHistory(request.getEducationHistory())
+            .bloodGroup(request.getBloodGroup())
+            .maritalStatus(request.getMaritalStatus())
+            .employmentStage(request.getEmploymentStage())
+            .selfServiceOn(request.isSelfServiceOn())
+            .probationEndDate(request.getProbationEndDate())
+            .dateOfConfirmation(request.getDateOfConfirmation())
+            .officeAddressDetail(request.getOfficeAddressDetail())
+            
+            .build(); // Only one build() at the very end
+           // return employee;
     }
+    public Employee getByEmail(String email) {
+    return employeeRepository.findByEmailAddress(email)
+            .orElseThrow(() -> new RuntimeException("Employee not found with email: " + email));
+}
 
     public List<EmployeeNameDTO> getAllEmployeeNames() {
         return employeeRepository.findAll().stream()

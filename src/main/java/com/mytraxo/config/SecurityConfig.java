@@ -79,7 +79,9 @@ public class SecurityConfig {
             // Only users with HR or ADMIN roles can access these
             .requestMatchers("/api/hr/reports/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
             .requestMatchers("/api/holidays/admin/**").hasAnyAuthority("HR", "ADMIN", "ROLE_HR", "ROLE_ADMIN")
-
+             // .requestMatchers("/api/employees/profile/**").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_ADMIN")
+           // .requestMatchers("/api/employees/update/**").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_ADMIN")
+           // .requestMatchers("/api/employees/directory").hasAnyAuthority("ROLE_EMPLOYEE", "ROLE_ADMIN")
         .anyRequest().authenticated()
       );
 
