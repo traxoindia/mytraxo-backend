@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface HolidayRepository extends MongoRepository<Holiday, String> {
      // This will fetch all holidays and sort them by date (latest/future first)
-    //List<Holiday> findAllByOrderByDateAsc(); 
+    List<Holiday> findAllByOrderByDateAsc(); 
     // If you want the most recent years at the top:
-    //List<Holiday> findAllByOrderByDateDesc();
+    List<Holiday> findAllByOrderByDateDesc();
     // Spring Data Mongo automatically translates these into Mongo Queries
     List<Holiday> findByDateBetween(LocalDate start, LocalDate end);
     Optional<Holiday> findByDate(LocalDate date);

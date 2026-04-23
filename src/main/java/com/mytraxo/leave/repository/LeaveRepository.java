@@ -10,5 +10,5 @@ public interface LeaveRepository extends MongoRepository<Leave, String> {
     List<Leave> findAll(); 
     List<Leave> findByEmployeeId(String employeeId);
     List<Leave> findByStatus(String status);
-    //List<Leave> findByEmployeeIdOrderByFromDateDesc(String employeeId);
+    List<Leave> findByEmployeeIdOrderByFromDateDesc(String employeeId);
 }

@@ -17,10 +17,10 @@ public class HolidayService {
         return holidayRepository.save(holiday);
     }
 
-    public List<Holiday> getAllHolidays() {
-        return holidayRepository.findAll();
-    }
-
+      public List<Holiday> getAllHolidays() {
+     //Change from findAll() to your new sorted method
+    return holidayRepository.findAllByOrderByDateAsc();
+}
     public List<Holiday> getHolidaysByMonth(int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
@@ -30,7 +30,5 @@ public class HolidayService {
     public boolean isHoliday(LocalDate date) {
         return holidayRepository.findByDate(date).isPresent();
     }
-   // public List<Holiday> getAllHolidays() {
-    // Change from findAll() to your new sorted method
-   // return holidayRepository.findAllByOrderByDateAsc();
+ 
 }

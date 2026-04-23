@@ -101,11 +101,11 @@ public Leave applyLeaveMobile(Leave leave, String filePath) {
         return repository.save(leave);
     }
 
-    public List<Leave> getByEmployee(String employeeId) {
-        return repository.findByEmployeeId(employeeId);
-    }
-    public List<Leave> getAllLeaves() {
-    return repository.findAll();
+   public List<Leave> getByEmployee(String employeeId) {
+    return repository.findByEmployeeIdOrderByFromDateDesc(employeeId); // Latest on top
+}
+public List<Leave> getAllLeaves() {
+    return repository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "fromDate"));
 }
 
 public List<Leave> getPendingLeaves() {
@@ -113,6 +113,6 @@ public List<Leave> getPendingLeaves() {
 }
 
 public List<Leave> getLeavesByEmployee(String employeeId) {
-    return repository.findByEmployeeId(employeeId);
+    return repository.findByEmployeeIdOrderByFromDateDesc(employeeId); // Latest on top
 }
 }
