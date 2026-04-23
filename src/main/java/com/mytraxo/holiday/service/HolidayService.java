@@ -30,4 +30,7 @@ public class HolidayService {
     public boolean isHoliday(LocalDate date) {
         return holidayRepository.findByDate(date).isPresent();
     }
+   // public List<Holiday> getAllHolidays() {
+    // Change from findAll() to your new sorted method
+   // return holidayRepository.findAllByOrderByDateAsc();
 }

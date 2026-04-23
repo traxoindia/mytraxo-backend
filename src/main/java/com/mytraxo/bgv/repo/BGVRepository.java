@@ -10,7 +10,7 @@ public interface BGVRepository extends MongoRepository<BGVSubmission, String> {
     Optional<BGVSubmission> findByToken(String token);
         // ADD THIS LINE: Find by Application ID (Used by HR to get the link)
     Optional<BGVSubmission> findByApplicationId(String applicationId);
-Optional<BGVSubmission> findByEmployeeId(String employeeId);
+//Optional<BGVSubmission> findByEmployeeId(String employeeId);
      BGVSubmission findByEmailAddress(String emailAddress);
      List<BGVSubmission> findByStatus(String status);
 }

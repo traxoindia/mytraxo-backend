@@ -60,7 +60,10 @@ public BGVSubmission getDetailsByToken(String token) {
         // Lists are mapped automatically
         bgv.setEducationDetails(submissionData.getEducationDetails());
         bgv.setEmploymentHistory(submissionData.getEmploymentHistory());
-        
+        bgv.setLastDrawnSalary(submissionData.getLastDrawnSalary());
+        bgv.setCriminalRecordDeclaration(submissionData.getCriminalRecordDeclaration());
+        bgv.setPermanentAddress(submissionData.getPermanentAddress());
+        bgv.setReferences(submissionData.getReferences()); // Map the references list
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);
     }
@@ -124,6 +127,29 @@ public BGVSubmission getDetailsByToken(String token) {
         app.setStage(ApplicationStage.REJECTED);
         careerRepo.save(app);
     }
+    public List<Map<String, Object>> getReadyToFinalize() {
+    // 1. Get all candidates who finished the onboarding forms
+    List<BGVSubmission> readySubmissions = bgvRepo.findByStatus("ONBOARDING_SUBMITTED");
+
+    return readySubmissions.stream().map(bgv -> {
+        Map<String, Object> response = new java.util.HashMap<>();
+        
+        // Add BGV data
+        response.put("bgvId", bgv.getId());
+        response.put("fullName", bgv.getFullName());
+        response.put("email", bgv.getEmailAddress());
+        response.put("status", bgv.getStatus());
+        response.put("applicationId", bgv.getApplicationId());
+
+        // 2. Fetch the Employee ID from the employeeRepo using the email
+        // This is where the ID you created in approveBGVStage lives
+        employeeRepo.findByEmailAddress(bgv.getEmailAddress()).ifPresent(emp -> {
+            response.put("employeeId", emp.getEmployeeId()); 
+        });
+
+        return response;
+    }).collect(java.util.stream.Collectors.toList());
+}
     public Map<String, String> bulkFinalizeEmployees(List<String> empIds) {
     Map<String, String> results = new java.util.HashMap<>();
     
