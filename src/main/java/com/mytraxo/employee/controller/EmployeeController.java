@@ -36,11 +36,11 @@ public class EmployeeController {
 
         return ResponseEntity.ok(directory);
     }
-        @GetMapping("/profile/{email}")
-    public ResponseEntity<Employee> getProfile(@PathVariable String email) {
-        // This calls the service method we discussed earlier
-        return ResponseEntity.ok(employeeService.getByEmail(email)); 
-    }
+    @GetMapping("/profile/{employeeId}")
+public ResponseEntity<Employee> getProfile(@PathVariable String employeeId) {
+    // Calling the service method to find employee by ID
+    return ResponseEntity.ok(employeeService.getEmployeeById(employeeId)); 
+}
     // This is the endpoint the mobile app will call to update a profile
     @PutMapping("/update/{employeeId}")
     public ResponseEntity<Employee> updateProfile(@PathVariable String employeeId, @RequestBody EmployeeRequest request) {

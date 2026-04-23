@@ -199,7 +199,11 @@ public class EmployeeService {
     return employeeRepository.findByEmailAddress(email)
             .orElseThrow(() -> new RuntimeException("Employee not found with email: " + email));
 }
-
+public Employee getEmployeeById(String employeeId) {
+    // Changed 'repository' to 'employeeRepository' to match your field name
+    return employeeRepository.findByEmployeeId(employeeId)
+        .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+}
     public List<EmployeeNameDTO> getAllEmployeeNames() {
         return employeeRepository.findAll().stream()
                 .map(emp -> new EmployeeNameDTO(

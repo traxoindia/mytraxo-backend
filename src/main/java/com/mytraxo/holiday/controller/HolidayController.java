@@ -24,4 +24,10 @@ public class HolidayController {
     public ResponseEntity<List<Holiday>> getAll() {
         return ResponseEntity.ok(holidayService.getAllHolidays());
     }
+    @GetMapping("/{year}/{month}")
+public ResponseEntity<List<Holiday>> getByMonth(
+        @PathVariable int year, 
+        @PathVariable int month) {
+    return ResponseEntity.ok(holidayService.getHolidaysByMonth(year, month));
+}
 }
