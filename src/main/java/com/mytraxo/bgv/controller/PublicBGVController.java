@@ -7,6 +7,7 @@ import com.mytraxo.bgv.repo.BGVRepository;
 import com.mytraxo.employee.entity.Employee;
 
 import com.mytraxo.employee.repo.EmployeeRepository;
+import com.mytraxo.bgv.service.BGVService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +31,21 @@ public class PublicBGVController {
    
    private final BGVRepository bgvRepo;
     private final EmployeeRepository employeeRepository;
+    private final BGVService bgvService; // Injected the Service
     private final String UPLOAD_DIR = "uploads/bgv_docs/";
 
     // PAGE 1: Background Verification Details
-@PostMapping("/submit-verification")
-    public String saveVerification(@RequestParam String token, @RequestBody BGVSubmission data) {
+@PostMapping(value = "/submit-verification", consumes = "multipart/form-data")
+    public String saveVerification(
+            @RequestParam String token, 
+            @ModelAttribute BGVSubmission data, // Maps JSON fields from form-data
+            @RequestParam("aadharCard") MultipartFile aadharCard,
+            @RequestParam("panCard") MultipartFile panCard,
+            @RequestParam("photo") MultipartFile photo,
+            @RequestParam(value = "marksheet10", required = false) MultipartFile marksheet10,
+            @RequestParam(value = "marksheet12", required = false) MultipartFile marksheet12,
+            @RequestParam(value = "degree", required = false) MultipartFile degree           // Optional
+) {
         BGVSubmission bgv = bgvRepo.findByToken(token).orElseThrow();
         bgv.setFullName(data.getFullName());
     bgv.setDob(data.getDob());
@@ -46,6 +57,10 @@ public class PublicBGVController {
     bgv.setEducationDetails(data.getEducationDetails());
     bgv.setEmploymentHistory(data.getEmploymentHistory());
     bgv.setReferences(data.getReferences());
+        // Delegate all saving logic to the service to avoid redundancy
+        bgvService.submitVerificationWithDocs(
+                token, data, aadharCard, panCard, photo, marksheet10, marksheet12, degree
+        );
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);
         return "Verification details saved. Proceed to Onboarding Page.";

@@ -11,10 +11,12 @@ import com.mytraxo.employee.repo.EmployeeRepository;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Map; // <--- ADD THIS IMPORT TO FIX THE 'Map' ERROR
 import java.util.Optional;
+import java.nio.file.*;
+import java.io.IOException;
 
 
 @RequiredArgsConstructor
@@ -44,7 +46,8 @@ public BGVSubmission getDetailsByToken(String token) {
             .orElseThrow(() -> new RuntimeException("Error: Invalid or expired BGV link."));
 }
     // This handles the JSON you asked about (Personal, Edu, Employment)
-    public void submitVerification(String token, BGVSubmission submissionData) {
+    public void submitVerificationWithDocs(String token, BGVSubmission submissionData,MultipartFile aadhar, MultipartFile pan, MultipartFile photo,
+    MultipartFile m10, MultipartFile m12, MultipartFile deg) {
         // Use .orElseThrow() to handle the Optional
         BGVSubmission bgv = bgvRepo.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid Token: " + token));
@@ -64,9 +67,38 @@ public BGVSubmission getDetailsByToken(String token) {
         bgv.setCriminalRecordDeclaration(submissionData.getCriminalRecordDeclaration());
         bgv.setPermanentAddress(submissionData.getPermanentAddress());
         bgv.setReferences(submissionData.getReferences()); // Map the references list
+        // 3. Handle File Saving
+    Map<String, String> paths = (bgv.getDocumentPaths() != null) ? bgv.getDocumentPaths() : new java.util.HashMap<>();
+    try {
+        paths.put("AADHAR_CARD", saveFile(aadhar, "aadhar_" + token));
+        paths.put("PAN_CARD", saveFile(pan, "pan_" + token));
+        paths.put("PASSPORT_PHOTO", saveFile(photo, "photo_" + token));
+
+        if (m10 != null && !m10.isEmpty()) paths.put("10TH_MARKSHEET", saveFile(m10, "m10_" + token));
+        if (m12 != null && !m12.isEmpty()) paths.put("12TH_MARKSHEET", saveFile(m12, "m12_" + token));
+        if (deg != null && !deg.isEmpty()) paths.put("HIGHEST_DEGREE", saveFile(deg, "degree_" + token));
+        
+    } catch (IOException e) {
+        throw new RuntimeException("File upload failed: " + e.getMessage());
+    }
+
+        bgv.setDocumentPaths(paths);
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);
     }
+    private String saveFile(MultipartFile file, String fileNamePrefix) throws IOException {
+    String folder = "uploads/bgv_docs/";
+    Path uploadPath = Paths.get(folder);
+    if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
+
+    String originalName = file.getOriginalFilename();
+    String extension = originalName.substring(originalName.lastIndexOf("."));
+    String finalName = fileNamePrefix + extension;
+    
+    Path filePath = uploadPath.resolve(finalName);
+    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    return filePath.toString();
+}
     // 1. HR Approves BGV (Creates the Employee record in ONBOARDING status)
 
     public String approveBGVStage(String bgvId) {
