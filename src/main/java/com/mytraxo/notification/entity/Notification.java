@@ -17,5 +17,6 @@ public class Notification {
     private String employeeId;
     private String message;
     private String type;
+    private String date; 
     private LocalDateTime createdAt;
 }

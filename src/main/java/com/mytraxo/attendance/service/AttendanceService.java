@@ -35,6 +35,7 @@ public class AttendanceService {
     private final HolidayService holidayService; 
      @Qualifier("attendanceNotificationRepo") 
     private final NotificationRepository notificationRepository; // This is for Mobile
+    private final com.mytraxo.notification.service.NotificationService notificationService;
 
     // ⏰ Late after 10:15 AM
     private static final LocalTime LATE_TIME = LocalTime.of(10, 15);
@@ -121,6 +122,7 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
 
     // Trigger Notification (Existing)
     sendMobileNotification(empId, title, message, "ATTENDANCE");
+    notificationService.create(empId, message, "ATTENDANCE");
 
     // Return the new Response DTO with the message
     return new CheckInResponse(saved, message,title);
@@ -168,6 +170,7 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
     }
 // 🔔 4. TRIGGER NOTIFICATION FOR empId (Mobile Requirement)
         sendMobileNotification(employeeId, "Check-in", "Successful at " + LocalTime.now(), "ATTENDANCE");
+        notificationService.create(employeeId, null, "ATTENDANCE");
     return repository.save(attendance);
     
 }
@@ -193,6 +196,7 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
         }
         // 🔔 TRIGGER NOTIFICATION FOR empId
         sendMobileNotification(employeeId, "Check-out", "Successful. Hours: " + attendance.getWorkingHours(), "ATTENDANCE");
+        notificationService.create(employeeId, "Check-out successful. Total hours: " + attendance.getWorkingHours(), "ATTENDANCE");
 
         return repository.save(attendance);
     }
