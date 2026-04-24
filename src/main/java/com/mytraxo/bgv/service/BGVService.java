@@ -178,7 +178,10 @@ public BGVSubmission getDetailsByToken(String token) {
         // 2. Fetch the Employee ID from the employeeRepo using the email
         // This is where the ID you created in approveBGVStage lives
 // DEBUG LOGIC: Check if the employee record actually exists
-        Optional<Employee> empOpt = employeeRepo.findByEmailAddress(bgv.getEmailAddress());
+        // Replace the crash-prone logic with a safe lookup
+Optional<Employee> empOpt = employeeRepo.findAllByEmailAddress(bgv.getEmailAddress())
+    .stream()
+    .findFirst(); // Safely take the first one if duplicates exist
         
         if (empOpt.isPresent()) {
             response.put("employeeId", empOpt.get().getEmployeeId());

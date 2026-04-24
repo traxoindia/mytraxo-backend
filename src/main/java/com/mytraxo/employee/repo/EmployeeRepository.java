@@ -12,4 +12,5 @@ public interface EmployeeRepository extends MongoRepository<Employee, String> {
     List<Employee> findByEmploymentStatus(EmployeeStatus status);
     boolean existsByEmployeeId(String employeeId);
     Optional<Employee> findByEmailAddress(String emailAddress);
+    List<Employee> findAllByEmailAddress(String emailAddress);
 }

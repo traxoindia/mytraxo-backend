@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
+//import org.springframework.data.mongodb.core.index.Indexed;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -28,6 +29,7 @@ public class Employee {
     private String dateOfBirth;
     private String gender;
     private String phoneNumber;
+    //@Indexed(unique = true)
     private String emailAddress;
     private String address;
 
