@@ -89,10 +89,11 @@ public ResponseEntity<String> approveBGV(@PathVariable String bgvId) {
 
 // 2. Get candidates who SUBMITTED ONBOARDING (Ready for HR Bulk Finalize)
 @GetMapping("/ready-to-finalize")
-public ResponseEntity<List<BGVSubmission>> getReadyToFinalize() {
-    return ResponseEntity.ok(bgvRepo.findByStatus("ONBOARDING_SUBMITTED"));
+public ResponseEntity<List<Map<String, Object>>> getReadyToFinalize() {
+    // DO NOT return bgvRepo directly. 
+    // Call the Service method that fetches the Employee ID.
+    return ResponseEntity.ok(bgvService.getReadyToFinalize());
 }
-
 
     // Finalize Onboarding and make them a CURRENT employee
     @PostMapping("/finalize/{empId}")

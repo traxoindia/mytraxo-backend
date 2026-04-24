@@ -100,6 +100,40 @@ public BGVSubmission getDetailsByToken(String token) {
 
         return bgvId; // Returning bgvId as you requested
     }
+    public void bulkApprove(List<String> bgvIds) {
+        for (String id : bgvIds) {
+            // 1. Find and update BGV status
+            BGVSubmission bgv = bgvRepo.findById(id)
+                    .orElseThrow(() -> new RuntimeException("BGV record not found for ID: " + id));
+            bgv.setStatus("BGV_APPROVED");
+            bgvRepo.save(bgv);
+
+            // 2. Update the Career Application stage
+            JobApplication app = careerRepo.findById(bgv.getApplicationId())
+                    .orElseThrow(() -> new RuntimeException("Job Application not found for ID: " + bgv.getApplicationId()));
+            app.setStage(ApplicationStage.ONBOARDING);
+            careerRepo.save(app);
+
+            // 3. CREATE the Employee record (This generates the EMP-ID)
+            // If the record already exists for this email, we skip creation to avoid duplicates
+            if (!employeeRepo.findByEmailAddress(bgv.getEmailAddress()).isPresent()) {
+                Employee emp = Employee.builder()
+                    .employeeId("EMP-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase())
+                    .fullName(bgv.getFullName())
+                    .emailAddress(bgv.getEmailAddress())
+                    .dateOfBirth(bgv.getDob())
+                    .phoneNumber(bgv.getContactNumber())
+                    .address(bgv.getCurrentAddress())
+                    .aadhaarNumber(bgv.getAadharNumber())
+                    .panNumber(bgv.getPanNumber())
+                    .passport(bgv.getPassportNumber())
+                    .employmentStatus(EmployeeStatus.ONBOARDING)
+                    .build();
+
+                employeeRepo.save(emp);
+            }
+        }
+    }
     // STEP 4: Candidate Submits Onboarding (Bank/Emergency) -> Status updated
   public void submitOnboarding(String token, BGVSubmission onboardingData) {
         // Use .orElseThrow() to handle the Optional
@@ -143,9 +177,15 @@ public BGVSubmission getDetailsByToken(String token) {
 
         // 2. Fetch the Employee ID from the employeeRepo using the email
         // This is where the ID you created in approveBGVStage lives
-        employeeRepo.findByEmailAddress(bgv.getEmailAddress()).ifPresent(emp -> {
-            response.put("employeeId", emp.getEmployeeId()); 
-        });
+// DEBUG LOGIC: Check if the employee record actually exists
+        Optional<Employee> empOpt = employeeRepo.findByEmailAddress(bgv.getEmailAddress());
+        
+        if (empOpt.isPresent()) {
+            response.put("employeeId", empOpt.get().getEmployeeId());
+        } else {
+            // This will show up in Postman if the lookup fails
+            response.put("employeeId", "ERROR: No Employee record found for this email");
+        }
 
         return response;
     }).collect(java.util.stream.Collectors.toList());
