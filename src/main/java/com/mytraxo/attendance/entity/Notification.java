@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.index.Indexed;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Data
 @Builder
@@ -24,6 +25,8 @@ public class Notification {
     private String message;    // e.g., "You checked in at 09:00 AM"
     private String type;       // e.g., "ATTENDANCE", "LEAVE", "PAYROLL"
     private LocalDate date;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime checkInTime; // If you use this for mobile
     
     @Builder.Default 
     private boolean read = false;

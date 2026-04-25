@@ -121,7 +121,7 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
     String title = "Check-in Successful";
 
     // Trigger Notification (Existing)
-    sendMobileNotification(empId, title, message, "ATTENDANCE");
+    //sendMobileNotification(empId, title, message, "ATTENDANCE");
     notificationService.create(empId, message, "ATTENDANCE");
 
     // Return the new Response DTO with the message
@@ -169,7 +169,7 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
         attendance.setStatus("PRESENT");
     }
 // 🔔 4. TRIGGER NOTIFICATION FOR empId (Mobile Requirement)
-        sendMobileNotification(employeeId, "Check-in", "Successful at " + LocalTime.now(), "ATTENDANCE");
+       // sendMobileNotification(employeeId, "Check-in", "Successful at " + LocalTime.now(), "ATTENDANCE");
         notificationService.create(employeeId, null, "ATTENDANCE");
     return repository.save(attendance);
     
@@ -189,13 +189,14 @@ public CheckInResponse mobileCheckInProcess(MobileCheckInRequest request) {
         attendance.setCheckOut(now);
 
         Duration duration = Duration.between(attendance.getCheckIn(), now);
-        attendance.setWorkingHours(duration.toMinutes() / 60.0);
+        double hours = duration.toMinutes() / 60.0;
+        attendance.setWorkingHours(Math.round(hours * 100.0) / 100.0);
 
         if (now.toLocalTime().isBefore(HALF_DAY_TIME)) {
             attendance.setStatus("HALF_DAY");
         }
         // 🔔 TRIGGER NOTIFICATION FOR empId
-        sendMobileNotification(employeeId, "Check-out", "Successful. Hours: " + attendance.getWorkingHours(), "ATTENDANCE");
+       // sendMobileNotification(employeeId, "Check-out", "Successful. Hours: " + attendance.getWorkingHours(), "ATTENDANCE");
         notificationService.create(employeeId, "Check-out successful. Total hours: " + attendance.getWorkingHours(), "ATTENDANCE");
 
         return repository.save(attendance);

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+
 @Data
 @Builder
 @NoArgsConstructor  // Required for JSON parsing

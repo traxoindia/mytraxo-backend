@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -26,7 +27,10 @@ public class Attendance {
     private String employeeId;
     private String employeeName;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime checkIn;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime checkOut;
 
     private Double workingHours;
