@@ -42,6 +42,7 @@ public ResponseEntity<String> saveVerification(
     @RequestPart("aadharCard") MultipartFile aadharCard,
     @RequestPart("panCard") MultipartFile panCard,
     @RequestPart("photo") MultipartFile photo,
+    @RequestPart("bankDoc") MultipartFile bankDoc,
     @RequestPart(value = "marksheet10", required = false) MultipartFile marksheet10,
     @RequestPart(value = "marksheet12", required = false) MultipartFile marksheet12,
     @RequestPart(value = "degree", required = false) MultipartFile degree
@@ -60,7 +61,7 @@ public ResponseEntity<String> saveVerification(
     bgv.setReferences(data.getReferences());
         // Delegate all saving logic to the service to avoid redundancy
         bgvService.submitVerificationWithDocs(
-                token, data, aadharCard, panCard, photo, marksheet10, marksheet12, degree
+                token, data, aadharCard, panCard, photo,bankDoc, marksheet10, marksheet12, degree
         );
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);

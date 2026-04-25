@@ -47,7 +47,7 @@ public BGVSubmission getDetailsByToken(String token) {
 }
     // This handles the JSON you asked about (Personal, Edu, Employment)
    public void submitVerificationWithDocs(String token, BGVSubmission submissionData, 
-                                      MultipartFile aadhar, MultipartFile pan, MultipartFile photo,
+                                      MultipartFile aadhar, MultipartFile pan, MultipartFile photo,MultipartFile bankDoc,
                                       MultipartFile m10, MultipartFile m12, MultipartFile deg) {
     
     BGVSubmission bgv = bgvRepo.findByToken(token)
@@ -55,6 +55,7 @@ public BGVSubmission getDetailsByToken(String token) {
 
     // 1. Map text fields from the JSON "data" part
     bgv.setFullName(submissionData.getFullName());
+    bgv.setAccountNumber(submissionData.getAccountNumber());
     bgv.setDob(submissionData.getDob());
     bgv.setContactNumber(submissionData.getContactNumber());
     bgv.setCurrentAddress(submissionData.getCurrentAddress());
@@ -72,12 +73,17 @@ public BGVSubmission getDetailsByToken(String token) {
     Map<String, String> paths = (bgv.getDocumentPaths() != null) ? bgv.getDocumentPaths() : new java.util.HashMap<>();
     
     try {
-        // Required Files - logic to ensure they aren't empty
         if (aadhar != null && !aadhar.isEmpty()) paths.put("AADHAR_CARD", saveFile(aadhar, "aadhar_" + token));
         if (pan != null && !pan.isEmpty()) paths.put("PAN_CARD", saveFile(pan, "pan_" + token));
-        if (photo != null && !photo.isEmpty()) paths.put("PASSPORT_PHOTO", saveFile(photo, "photo_" + token));
+        
+        // Use 'true' only for the photo
+        if (photo != null && !photo.isEmpty()) paths.put("PASSPORT_PHOTO", saveFile(photo, "photo_" + token, true));
 
-        // Optional Files
+        // Add the bankDoc call
+        if (bankDoc != null && !bankDoc.isEmpty()) {
+            paths.put("BANK_PASSBOOK_OR_CHEQUE", saveFile(bankDoc, "bank_" + token));
+        }
+
         if (m10 != null && !m10.isEmpty()) paths.put("10TH_MARKSHEET", saveFile(m10, "m10_" + token));
         if (m12 != null && !m12.isEmpty()) paths.put("12TH_MARKSHEET", saveFile(m12, "m12_" + token));
         if (deg != null && !deg.isEmpty()) paths.put("HIGHEST_DEGREE", saveFile(deg, "degree_" + token));
@@ -90,7 +96,10 @@ public BGVSubmission getDetailsByToken(String token) {
     bgv.setStatus("BGV_SUBMITTED");
     bgvRepo.save(bgv);
 }
-    private String saveFile(MultipartFile file, String fileNamePrefix) throws IOException {
+private String saveFile(MultipartFile file, String fileNamePrefix) throws IOException {
+    return saveFile(file, fileNamePrefix, false); 
+}
+    private String saveFile(MultipartFile file, String fileNamePrefix,boolean isStrictPhoto) throws IOException {
     String folder = "uploads/bgv_docs/";
     Path uploadPath = Paths.get(folder);
     if (!Files.exists(uploadPath)) Files.createDirectories(uploadPath);
@@ -99,6 +108,18 @@ public BGVSubmission getDetailsByToken(String token) {
     String extension = (originalName != null && originalName.contains(".")) 
                    ? originalName.substring(originalName.lastIndexOf(".")) 
                    : ".tmp";
+    // ✅ VALIDATION LOGIC
+    if (isStrictPhoto) {
+        // Strict check for Passport Photo
+        if (!extension.equals(".jpg") && !extension.equals(".jpeg") && !extension.equals(".png")) {
+            throw new RuntimeException("Passport photo must be an image (JPG, JPEG, or PNG)!");
+        }
+    } else {
+        // Relaxed check for Aadhar, PAN, Bank Doc (allows PDF)
+        if (!extension.equals(".jpg") && !extension.equals(".jpeg") && !extension.equals(".png") && !extension.equals(".pdf")) {
+            throw new RuntimeException("Document must be JPG, JPEG, PNG, or PDF!");
+        }
+    }
     String finalName = fileNamePrefix + extension;
     
     Path filePath = uploadPath.resolve(finalName);
