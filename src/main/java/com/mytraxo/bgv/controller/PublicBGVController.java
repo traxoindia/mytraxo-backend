@@ -36,16 +36,17 @@ public class PublicBGVController {
 
     // PAGE 1: Background Verification Details
 @PostMapping(value = "/submit-verification", consumes = "multipart/form-data")
-    public String saveVerification(
-            @RequestParam String token, 
-            @ModelAttribute BGVSubmission data, // Maps JSON fields from form-data
-            @RequestParam("aadharCard") MultipartFile aadharCard,
-            @RequestParam("panCard") MultipartFile panCard,
-            @RequestParam("photo") MultipartFile photo,
-            @RequestParam(value = "marksheet10", required = false) MultipartFile marksheet10,
-            @RequestParam(value = "marksheet12", required = false) MultipartFile marksheet12,
-            @RequestParam(value = "degree", required = false) MultipartFile degree           // Optional
-) {
+public ResponseEntity<String> saveVerification(
+    @RequestParam String token,
+    @RequestPart("data") BGVSubmission data, // Frontend sends existing JSON here
+    @RequestPart("aadharCard") MultipartFile aadharCard,
+    @RequestPart("panCard") MultipartFile panCard,
+    @RequestPart("photo") MultipartFile photo,
+    @RequestPart(value = "marksheet10", required = false) MultipartFile marksheet10,
+    @RequestPart(value = "marksheet12", required = false) MultipartFile marksheet12,
+    @RequestPart(value = "degree", required = false) MultipartFile degree
+)
+ {
         BGVSubmission bgv = bgvRepo.findByToken(token).orElseThrow();
         bgv.setFullName(data.getFullName());
     bgv.setDob(data.getDob());
@@ -63,7 +64,7 @@ public class PublicBGVController {
         );
         bgv.setStatus("BGV_SUBMITTED");
         bgvRepo.save(bgv);
-        return "Verification details saved. Proceed to Onboarding Page.";
+       return ResponseEntity.ok("Verification details saved. Proceed to Onboarding Page.");
     }
 
 
